@@ -1,0 +1,7 @@
+services:
+  umineko-minesweeper:
+    build: .
+    container_name: umineko-minesweeper
+    restart: unless-stopped
+    ports:
+      - "4324:2000"

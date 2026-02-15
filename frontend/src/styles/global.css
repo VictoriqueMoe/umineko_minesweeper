@@ -1,0 +1,690 @@
+@import "./variables.css";
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg-void);
+    color: var(--text);
+    min-height: 100vh;
+    background-image:
+        radial-gradient(ellipse at 30% 20%, rgba(107, 76, 154, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 80%, rgba(212, 168, 75, 0.04) 0%, transparent 60%);
+    background-attachment: fixed;
+    overflow-x: hidden;
+}
+
+#root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.particles-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.header {
+    text-align: center;
+    padding: 2rem 1rem 1rem;
+    width: 100%;
+}
+
+.header h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-shadow: 0 0 30px rgba(var(--gold-rgb), 0.3);
+}
+
+.header .ornament {
+    color: var(--gold-dark);
+    font-size: 0.75rem;
+    letter-spacing: 0.5em;
+    margin-top: 0.5rem;
+    text-shadow: 0 0 15px rgba(var(--gold-rgb), 0.2);
+}
+
+.lobby {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 3rem 1.5rem;
+    max-width: 480px;
+    width: 100%;
+}
+
+.lobby-card {
+    background: linear-gradient(135deg, var(--bg-card), rgba(var(--bg-card-rgb), 0.6));
+    border: 1px solid var(--purple-muted);
+    border-left: 3px solid var(--gold);
+    padding: 2rem;
+    width: 100%;
+    animation: fadeInUp 0.5s var(--ease-out);
+}
+
+.lobby-card h2 {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+}
+
+.lobby-card p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.lobby-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--bg-purple);
+    border: 1px solid var(--purple-muted);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    letter-spacing: 0.3em;
+    text-align: center;
+    text-transform: uppercase;
+    transition: border-color 0.2s var(--ease-out);
+}
+
+.lobby-input::placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+    letter-spacing: 0.1em;
+    text-transform: none;
+    font-family: var(--font-body);
+    font-size: 1rem;
+}
+
+.lobby-input:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 2rem;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+    border: 1px solid var(--purple-muted);
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 20px rgba(var(--gold-rgb), var(--hover-glow));
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    color: var(--bg-void);
+    border-color: var(--gold);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 0 25px rgba(var(--gold-rgb), 0.3);
+    color: var(--bg-void);
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+    border-color: var(--purple-muted);
+    color: var(--text-muted);
+    box-shadow: none;
+}
+
+.room-code {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    letter-spacing: 0.4em;
+    text-shadow: 0 0 20px rgba(var(--gold-rgb), 0.4);
+    padding: 0.5rem 0;
+    user-select: all;
+}
+
+.waiting-text {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 1.1rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.game-layout {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem 2rem 2rem;
+    width: 100%;
+    max-width: 1200px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.board-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.board-label {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+}
+
+.board-label.opponent {
+    color: var(--purple-light);
+}
+
+.board-wrapper {
+    position: relative;
+}
+
+.sparkle-canvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.board {
+    display: grid;
+    gap: 1px;
+    background: var(--purple-muted);
+    border: 2px solid var(--purple-muted);
+    box-shadow: 0 0 30px rgba(var(--purple-rgb), 0.15);
+    transition: box-shadow 0.3s;
+}
+
+.board.main {
+    --cell-size: 32px;
+    grid-template-columns: repeat(var(--cols), var(--cell-size));
+    grid-template-rows: repeat(var(--rows), var(--cell-size));
+}
+
+.board.mini {
+    --cell-size: 16px;
+    grid-template-columns: repeat(var(--cols), var(--cell-size));
+    grid-template-rows: repeat(var(--rows), var(--cell-size));
+}
+
+.board.exploding {
+    box-shadow: 0 0 40px rgba(var(--rose-rgb), 0.3);
+}
+
+.cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: calc(var(--cell-size) * 0.5);
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.cell.hidden {
+    background: var(--bg-card);
+    transition: background-color 0.15s;
+}
+
+.cell.hidden:hover {
+    background: var(--bg-card-hover);
+    box-shadow: inset 0 0 8px rgba(var(--gold-rgb), 0.08);
+}
+
+.cell.revealed {
+    background: var(--bg-purple);
+    cursor: default;
+    animation: cellReveal 0.35s var(--ease-spring) backwards;
+    animation-delay: var(--anim-delay, 0ms);
+}
+
+.cell.flagged {
+    background: var(--bg-card);
+    color: var(--rose);
+}
+
+.cell.flagged.denied {
+    animation: cellDenied 0.4s var(--ease-out);
+}
+
+.flag-icon {
+    animation: flagPlant 0.3s var(--ease-spring);
+    display: inline-block;
+}
+
+.cell.mine {
+    background: var(--rose);
+    color: var(--text);
+    cursor: default;
+}
+
+.cell.mine.exploding {
+    animation: mineExplode 0.4s var(--ease-spring);
+    background: var(--rose);
+}
+
+.cell.mine.exploding .mine-icon {
+    animation: mineShake 0.4s ease-in-out;
+}
+
+.mine-icon {
+    display: inline-block;
+}
+
+.cell.val-1 {
+    color: var(--cell-1);
+}
+.cell.val-2 {
+    color: var(--cell-2);
+}
+.cell.val-3 {
+    color: var(--cell-3);
+}
+.cell.val-4 {
+    color: var(--cell-4);
+}
+.cell.val-5 {
+    color: var(--cell-5);
+}
+.cell.val-6 {
+    color: var(--cell-6);
+}
+.cell.val-7 {
+    color: var(--cell-7);
+}
+.cell.val-8 {
+    color: var(--cell-8);
+}
+
+.cell.revealed.val-1,
+.cell.revealed.val-2,
+.cell.revealed.val-3,
+.cell.revealed.val-4,
+.cell.revealed.val-5,
+.cell.revealed.val-6,
+.cell.revealed.val-7,
+.cell.revealed.val-8 {
+    text-shadow: 0 0 6px currentColor;
+}
+
+.board.mini .cell {
+    cursor: default;
+    font-size: 0;
+}
+
+.board.mini .cell.revealed {
+    background: rgba(var(--purple-rgb), 0.4);
+    animation: none;
+}
+
+.board.mini .cell.flagged {
+    background: rgba(var(--rose-rgb), 0.4);
+}
+
+.board.mini .cell.mine {
+    background: var(--rose);
+}
+
+.game-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+}
+
+.game-info .stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.game-info .stat-value {
+    color: var(--gold-light);
+    font-weight: 600;
+}
+
+.game-over-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: fadeIn 0.3s var(--ease-out);
+}
+
+.game-over-card {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-purple));
+    border: 2px solid var(--gold-dark);
+    padding: 3rem;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    animation: scaleIn 0.4s var(--ease-spring);
+}
+
+.game-over-card h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 0.75rem;
+}
+
+.game-over-card h2.win {
+    color: var(--gold-light);
+    text-shadow: 0 0 30px rgba(var(--gold-rgb), 0.5);
+}
+
+.game-over-card h2.lose {
+    color: var(--rose);
+    text-shadow: 0 0 20px rgba(var(--rose-rgb), 0.4);
+}
+
+.game-over-card p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    font-style: italic;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.game-over-card .btn {
+    width: 100%;
+}
+
+.error-text {
+    color: var(--rose);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.divider {
+    width: 2px;
+    background: var(--purple-muted);
+    align-self: stretch;
+    min-height: 200px;
+}
+
+.disconnect-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 90;
+    animation: fadeIn 0.3s var(--ease-out);
+}
+
+.disconnect-card {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-purple));
+    border: 2px solid var(--purple-muted);
+    border-left: 3px solid var(--gold);
+    padding: 2.5rem;
+    text-align: center;
+    max-width: 360px;
+    width: 90%;
+    animation: scaleIn 0.4s var(--ease-spring);
+}
+
+.disconnect-card h2 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+}
+
+.disconnect-card p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-style: italic;
+    line-height: 1.6;
+}
+
+.disconnect-countdown {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    text-shadow: 0 0 25px rgba(var(--gold-rgb), 0.5);
+    margin: 1rem 0;
+}
+
+.disconnect-sub {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--purple-muted);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    margin: 1.5rem auto;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes cellReveal {
+    0% {
+        opacity: 0;
+        transform: scale(0.6);
+        background: rgba(var(--gold-rgb), 0.15);
+    }
+    50% {
+        background: rgba(var(--gold-rgb), 0.08);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        background: var(--bg-purple);
+    }
+}
+
+@keyframes mineExplode {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+        background: var(--gold);
+    }
+    30% {
+        transform: scale(1.3);
+        background: #ff6644;
+    }
+    60% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+        background: var(--rose);
+    }
+}
+
+@keyframes mineShake {
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+    20% {
+        transform: rotate(-15deg);
+    }
+    40% {
+        transform: rotate(15deg);
+    }
+    60% {
+        transform: rotate(-10deg);
+    }
+    80% {
+        transform: rotate(10deg);
+    }
+}
+
+@keyframes flagPlant {
+    0% {
+        transform: scale(0) rotate(-45deg);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.2) rotate(5deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes cellDenied {
+    0%,
+    100% {
+        transform: translateX(0);
+        box-shadow: none;
+    }
+    15% {
+        transform: translateX(-3px);
+        box-shadow: inset 0 0 8px rgba(var(--rose-rgb), 0.4);
+    }
+    30% {
+        transform: translateX(3px);
+    }
+    45% {
+        transform: translateX(-2px);
+    }
+    60% {
+        transform: translateX(2px);
+    }
+    75% {
+        transform: translateX(-1px);
+        box-shadow: inset 0 0 4px rgba(var(--rose-rgb), 0.2);
+    }
+}
+
+@media (max-width: 768px) {
+    .game-layout {
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+    }
+
+    .board.main {
+        --cell-size: 24px;
+    }
+
+    .divider {
+        width: 80%;
+        height: 2px;
+        min-height: unset;
+    }
+}
