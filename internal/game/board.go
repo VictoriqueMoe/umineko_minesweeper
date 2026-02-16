@@ -1,7 +1,7 @@
 package game
 
 import (
-	"math/rand"
+	"math/rand/v2"
 )
 
 type (
@@ -19,7 +19,6 @@ type (
 		Mines  int
 		cells  [][]CellValue
 		placed bool
-		seed   int64
 	}
 )
 
@@ -27,12 +26,11 @@ const (
 	Mine CellValue = -1
 )
 
-func NewBoard(width, height, mines int, seed int64) *Board {
+func NewBoard(width, height, mines int) *Board {
 	b := &Board{
 		Width:  width,
 		Height: height,
 		Mines:  mines,
-		seed:   seed,
 	}
 
 	b.cells = make([][]CellValue, height)
@@ -43,24 +41,28 @@ func NewBoard(width, height, mines int, seed int64) *Board {
 	return b
 }
 
-func (b *Board) EnsurePlaced(safeX, safeY int) {
+func (b *Board) EnsurePlaced(safeZones [][2]int) {
 	if b.placed {
 		return
 	}
 	b.placed = true
-	b.placeMines(safeX, safeY)
+	b.placeMines(safeZones)
 	b.calculateAdjacency()
 }
 
-func (b *Board) placeMines(safeX, safeY int) {
-	rng := rand.New(rand.NewSource(b.seed))
+func (b *Board) IsPlaced() bool {
+	return b.placed
+}
 
+func (b *Board) placeMines(safeZones [][2]int) {
 	excluded := make(map[int]bool)
-	for dy := -1; dy <= 1; dy++ {
-		for dx := -1; dx <= 1; dx++ {
-			nx, ny := safeX+dx, safeY+dy
-			if nx >= 0 && nx < b.Width && ny >= 0 && ny < b.Height {
-				excluded[ny*b.Width+nx] = true
+	for _, safe := range safeZones {
+		for dy := -1; dy <= 1; dy++ {
+			for dx := -1; dx <= 1; dx++ {
+				nx, ny := safe[0]+dx, safe[1]+dy
+				if nx >= 0 && nx < b.Width && ny >= 0 && ny < b.Height {
+					excluded[ny*b.Width+nx] = true
+				}
 			}
 		}
 	}
@@ -73,7 +75,7 @@ func (b *Board) placeMines(safeX, safeY int) {
 		}
 	}
 
-	rng.Shuffle(len(candidates), func(i, j int) {
+	rand.Shuffle(len(candidates), func(i, j int) {
 		candidates[i], candidates[j] = candidates[j], candidates[i]
 	})
 

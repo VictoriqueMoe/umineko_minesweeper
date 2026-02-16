@@ -1,12 +1,9 @@
 package game
 
 import (
-	"crypto/rand"
 	"fmt"
-	"math/big"
-	mathrand "math/rand"
+	"math/rand/v2"
 	"sync"
-	"time"
 )
 
 type Difficulty string
@@ -64,9 +61,8 @@ func (rm *RoomManager) CreateRoom(difficulty Difficulty) (*Room, string) {
 	defer rm.mu.Unlock()
 
 	code := rm.generateCode()
-	seed := time.Now().UnixNano()
 	width, height, mines := GetDifficultyConfig(difficulty)
-	game := NewGame(code, width, height, mines, seed)
+	game := NewGame(code, width, height, mines)
 
 	room := &Room{
 		Game:        game,
@@ -148,12 +144,7 @@ func (rm *RoomManager) generateCode() string {
 	for {
 		code := make([]byte, CodeLength)
 		for i := 0; i < CodeLength; i++ {
-			n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
-			if err != nil {
-				code[i] = charset[mathrand.Intn(len(charset))]
-			} else {
-				code[i] = charset[n.Int64()]
-			}
+			code[i] = charset[rand.IntN(len(charset))]
 		}
 		codeStr := string(code)
 		if _, exists := rm.rooms[codeStr]; !exists {

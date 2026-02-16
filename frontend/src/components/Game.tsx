@@ -1,7 +1,7 @@
-import {BoardState, CellState, GamePhase} from "../types/game";
-import {Board} from "./Board";
-import {MiniBoard} from "./MiniBoard";
-import {CHARACTERS} from "../characters";
+import { BoardState, CellState, GamePhase } from "../types/game";
+import { Board } from "./Board";
+import { MiniBoard } from "./MiniBoard";
+import { CHARACTERS } from "../characters";
 
 interface GameProps {
     phase: GamePhase;
@@ -9,6 +9,7 @@ interface GameProps {
     opponentBoard: BoardState;
     myCharacter: string;
     opponentCharacter: string;
+    pendingClick: { x: number; y: number } | null;
     onReveal: (x: number, y: number) => void;
     onFlag: (x: number, y: number) => void;
 }
@@ -41,7 +42,16 @@ function findCharacter(id: string) {
     return CHARACTERS.find(c => c.id === id);
 }
 
-export function Game({ phase, myBoard, opponentBoard, myCharacter, opponentCharacter, onReveal, onFlag }: GameProps) {
+export function Game({
+    phase,
+    myBoard,
+    opponentBoard,
+    myCharacter,
+    opponentCharacter,
+    pendingClick,
+    onReveal,
+    onFlag,
+}: GameProps) {
     const totalSafe = myBoard.width * myBoard.height - myBoard.mines;
     const myRevealed = countRevealed(myBoard);
     const opRevealed = countRevealed(opponentBoard);
@@ -50,48 +60,63 @@ export function Game({ phase, myBoard, opponentBoard, myCharacter, opponentChara
     const myChar = findCharacter(myCharacter);
     const opChar = findCharacter(opponentCharacter);
 
+    const flipLeft = myChar && myChar.facing === "left";
+    const flipRight = opChar && opChar.facing === "right";
+
     return (
-        <>
-            <div className="game-info">
-                <div className="stat">
-                    Progress{" "}
-                    <span className="stat-value">
-                        {myRevealed}/{totalSafe}
-                    </span>
+        <div className="game-layout">
+            <div className="board-column">
+                <div className="fighter-banner">
+                    {myChar && (
+                        <img
+                            className="fighter-img"
+                            src={myChar.image}
+                            alt={myChar.name}
+                            style={flipLeft ? { transform: "scaleX(-1)" } : undefined}
+                        />
+                    )}
+                    <div className="fighter-nameplate">{myChar?.name ?? "You"}</div>
                 </div>
-                <div className="stat">
-                    Flags{" "}
-                    <span className="stat-value">
-                        {myFlagged}/{myBoard.mines}
-                    </span>
+                <div className="board-stats">
+                    <div className="stat-row">
+                        <span className="stat-label">Progress</span>
+                        <span className="stat-value">
+                            {myRevealed} / {totalSafe}
+                        </span>
+                    </div>
+                    <div className="stat-row">
+                        <span className="stat-label">Flags</span>
+                        <span className="stat-value flag">
+                            {myFlagged} / {myBoard.mines}
+                        </span>
+                    </div>
                 </div>
-                <div className="stat">
-                    Opponent{" "}
-                    <span className="stat-value">
-                        {opRevealed}/{totalSafe}
-                    </span>
-                </div>
+                <Board board={myBoard} phase={phase} pendingClick={pendingClick} onReveal={onReveal} onFlag={onFlag} />
+                {pendingClick && <div className="pending-text">Waiting for opponent's first move...</div>}
             </div>
 
-            <div className="game-layout">
-                <div className="board-section">
-                    {myChar && <img className="board-character-bg" src={myChar.image} alt="" />}
-                    <div className="board-header">
-                        <div className="board-label">{myChar?.name ?? "Your Board"}</div>
-                    </div>
-                    <Board board={myBoard} phase={phase} onReveal={onReveal} onFlag={onFlag} />
+            <div className={`board-column${opponentCharacter ? ` theme-${opponentCharacter}` : ""}`}>
+                <div className="fighter-banner">
+                    {opChar && (
+                        <img
+                            className="fighter-img"
+                            src={opChar.image}
+                            alt={opChar.name}
+                            style={flipRight ? { transform: "scaleX(-1)" } : undefined}
+                        />
+                    )}
+                    <div className="fighter-nameplate opponent">{opChar?.name ?? "Opponent"}</div>
                 </div>
-
-                <div className="divider" />
-
-                <div className={`board-section${opponentCharacter ? ` theme-${opponentCharacter}` : ""}`}>
-                    {opChar && <img className="board-character-bg" src={opChar.image} alt="" />}
-                    <div className="board-header">
-                        <div className="board-label opponent">{opChar?.name ?? "Opponent"}</div>
+                <div className="board-stats">
+                    <div className="stat-row">
+                        <span className="stat-label">Progress</span>
+                        <span className="stat-value">
+                            {opRevealed} / {totalSafe}
+                        </span>
                     </div>
-                    <MiniBoard board={opponentBoard} />
                 </div>
+                <MiniBoard board={opponentBoard} />
             </div>
-        </>
+        </div>
     );
 }

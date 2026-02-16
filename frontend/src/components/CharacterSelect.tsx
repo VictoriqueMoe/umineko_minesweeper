@@ -1,4 +1,4 @@
-import {CHARACTERS} from "../characters";
+import { CHARACTERS } from "../characters";
 
 interface CharacterSelectProps {
     hostCharacter: string;
@@ -20,11 +20,7 @@ export function CharacterSelect({ hostCharacter, onSelect }: CharacterSelectProp
                             onClick={() => !taken && onSelect(c.id)}
                             disabled={taken}
                         >
-                            <img
-                                className="character-select-portrait"
-                                src={c.image}
-                                alt={c.name}
-                            />
+                            <img className="character-select-portrait" src={c.image} alt={c.name} />
                             <span className="character-select-name">{c.name}</span>
                             {taken && <span className="character-taken-label">Opponent</span>}
                         </button>

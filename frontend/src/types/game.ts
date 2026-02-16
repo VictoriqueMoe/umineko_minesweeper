@@ -15,6 +15,7 @@ export type MessageType =
     | "opponent_disconnected"
     | "opponent_reconnected"
     | "reconnected"
+    | "first_click_pending"
     | "error";
 
 export interface OutgoingMessage {
@@ -101,4 +102,5 @@ export interface GameState {
     hostCharacter: string;
     pendingMineCells: CellData[];
     triggeredMine: CellData | null;
+    pendingClick: { x: number; y: number } | null;
 }

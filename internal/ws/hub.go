@@ -322,8 +322,15 @@ func (h *Hub) handleReveal(client *Client, x, y int) {
 		return
 	}
 
-	result := room.Game.Reveal(client.PlayerNumber, x, y)
-	if result == nil {
+	results := room.Game.Reveal(client.PlayerNumber, x, y)
+	if len(results) == 0 {
+		if !room.Game.Board.IsPlaced() {
+			client.SendMessage(OutgoingMessage{
+				Type: MsgFirstClickPending,
+				X:    x,
+				Y:    y,
+			})
+		}
 		return
 	}
 
@@ -331,33 +338,36 @@ func (h *Hub) handleReveal(client *Client, x, y int) {
 	clients := h.rooms[code]
 	h.mu.RUnlock()
 
-	for _, c := range clients {
-		c.SendMessage(OutgoingMessage{
-			Type:   MsgCellsRevealed,
-			Player: client.PlayerNumber,
-			Cells:  result.Cells,
-		})
-	}
-
-	if result.GameOver {
-		msg := OutgoingMessage{
-			Type:   MsgGameOver,
-			Winner: result.Result.Winner,
-			Loser:  result.Result.Loser,
-			Reason: string(result.Result.Reason),
-		}
-		if result.Result.Reason == game.ReasonMineHit {
-			msg.MineCells = room.Game.Board.GetMinePositions()
-		}
+	for _, result := range results {
 		for _, c := range clients {
-			c.SendMessage(msg)
-			c.RoomCode = ""
-			c.Token = ""
+			c.SendMessage(OutgoingMessage{
+				Type:   MsgCellsRevealed,
+				Player: result.Player,
+				Cells:  result.Cells,
+			})
 		}
-		h.mu.Lock()
-		delete(h.rooms, code)
-		h.RoomManager.RemoveRoom(code)
-		h.mu.Unlock()
+
+		if result.GameOver {
+			msg := OutgoingMessage{
+				Type:   MsgGameOver,
+				Winner: result.Result.Winner,
+				Loser:  result.Result.Loser,
+				Reason: string(result.Result.Reason),
+			}
+			if result.Result.Reason == game.ReasonMineHit {
+				msg.MineCells = room.Game.Board.GetMinePositions()
+			}
+			for _, c := range clients {
+				c.SendMessage(msg)
+				c.RoomCode = ""
+				c.Token = ""
+			}
+			h.mu.Lock()
+			delete(h.rooms, code)
+			h.RoomManager.RemoveRoom(code)
+			h.mu.Unlock()
+			return
+		}
 	}
 }
 

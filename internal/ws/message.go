@@ -62,5 +62,6 @@ const (
 	MsgOpponentDisconnected MessageType = "opponent_disconnected"
 	MsgOpponentReconnected  MessageType = "opponent_reconnected"
 	MsgReconnected          MessageType = "reconnected"
+	MsgFirstClickPending    MessageType = "first_click_pending"
 	MsgError                MessageType = "error"
 )

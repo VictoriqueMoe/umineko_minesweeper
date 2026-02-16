@@ -1,15 +1,16 @@
 import * as React from "react";
-import {useRef} from "react";
-import {CellState, ClientCell} from "../types/game";
+import { useRef } from "react";
+import { CellState, ClientCell } from "../types/game";
 
 interface CellProps {
     cell: ClientCell;
+    pending: boolean;
     onClick: () => void;
     onContextMenu: () => void;
     disabled: boolean;
 }
 
-export function Cell({ cell, onClick, onContextMenu, disabled }: CellProps) {
+export function Cell({ cell, pending, onClick, onContextMenu, disabled }: CellProps) {
     const deniedRef = useRef<HTMLDivElement>(null);
 
     const handleMouseDown = (e: React.MouseEvent) => {
@@ -86,7 +87,7 @@ export function Cell({ cell, onClick, onContextMenu, disabled }: CellProps) {
 
     return (
         <div
-            className="cell hidden"
+            className={`cell hidden${pending ? " pending" : ""}`}
             onMouseDown={handleMouseDown}
             onContextMenu={preventContext}
             style={disabled ? { cursor: "default" } : undefined}

@@ -22,17 +22,19 @@ type (
 	}
 
 	RevealResult struct {
+		Player   int
 		Cells    []Cell
 		GameOver bool
 		Result   *GameResult
 	}
 
 	Game struct {
-		mu      sync.Mutex
-		Board   *Board
-		State   GameState
-		Players [2]*PlayerState
-		Code    string
+		mu            sync.Mutex
+		Board         *Board
+		State         GameState
+		Players       [2]*PlayerState
+		Code          string
+		pendingClicks [2]*[2]int
 	}
 )
 
@@ -48,8 +50,8 @@ const (
 	ReasonForfeit  GameOverReason = "forfeit"
 )
 
-func NewGame(code string, width, height, mines int, seed int64) *Game {
-	board := NewBoard(width, height, mines, seed)
+func NewGame(code string, width, height, mines int) *Game {
+	board := NewBoard(width, height, mines)
 
 	g := &Game{
 		Board: board,
@@ -95,7 +97,7 @@ func (g *Game) validateAction(player, x, y int) *PlayerState {
 	return ps
 }
 
-func (g *Game) Reveal(player, x, y int) *RevealResult {
+func (g *Game) Reveal(player, x, y int) []*RevealResult {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
@@ -108,12 +110,57 @@ func (g *Game) Reveal(player, x, y int) *RevealResult {
 		return nil
 	}
 
-	g.Board.EnsurePlaced(x, y)
+	if !g.Board.IsPlaced() {
+		if g.pendingClicks[player] != nil {
+			return nil
+		}
+		g.pendingClicks[player] = &[2]int{x, y}
+
+		other := 1 - player
+		if g.pendingClicks[other] == nil {
+			return nil
+		}
+
+		g.Board.EnsurePlaced([][2]int{
+			{g.pendingClicks[0][0], g.pendingClicks[0][1]},
+			{g.pendingClicks[1][0], g.pendingClicks[1][1]},
+		})
+
+		var results []*RevealResult
+		for p := 0; p < 2; p++ {
+			pc := g.pendingClicks[p]
+			pState := g.Players[p]
+			cells := g.Board.FloodFill(pc[0], pc[1], pState.Revealed)
+			pState.RevealedCount += len(cells)
+
+			result := &RevealResult{
+				Player: p,
+				Cells:  cells,
+			}
+
+			if pState.RevealedCount >= g.Board.TotalSafeCells() {
+				g.State = StateFinished
+				result.GameOver = true
+				result.Result = &GameResult{
+					Winner: p,
+					Loser:  1 - p,
+					Reason: ReasonComplete,
+				}
+				results = append(results, result)
+				break
+			}
+
+			results = append(results, result)
+		}
+
+		return results
+	}
 
 	if g.Board.IsMine(x, y) {
 		g.State = StateFinished
 		opponent := 1 - player
-		return &RevealResult{
+		return []*RevealResult{{
+			Player:   player,
 			Cells:    []Cell{{X: x, Y: y, Value: Mine}},
 			GameOver: true,
 			Result: &GameResult{
@@ -121,7 +168,7 @@ func (g *Game) Reveal(player, x, y int) *RevealResult {
 				Loser:  player,
 				Reason: ReasonMineHit,
 			},
-		}
+		}}
 	}
 
 	cells := g.Board.FloodFill(x, y, ps.Revealed)
@@ -130,7 +177,8 @@ func (g *Game) Reveal(player, x, y int) *RevealResult {
 	if ps.RevealedCount >= g.Board.TotalSafeCells() {
 		g.State = StateFinished
 		opponent := 1 - player
-		return &RevealResult{
+		return []*RevealResult{{
+			Player:   player,
 			Cells:    cells,
 			GameOver: true,
 			Result: &GameResult{
@@ -138,13 +186,13 @@ func (g *Game) Reveal(player, x, y int) *RevealResult {
 				Loser:  opponent,
 				Reason: ReasonComplete,
 			},
-		}
+		}}
 	}
 
-	return &RevealResult{
-		Cells:    cells,
-		GameOver: false,
-	}
+	return []*RevealResult{{
+		Player: player,
+		Cells:  cells,
+	}}
 }
 
 func (g *Game) Flag(player, x, y int) *bool {

@@ -1,7 +1,7 @@
-import {useCallback, useEffect, useReducer, useRef} from "react";
-import {GamePhase, IncomingMessage} from "../types/game";
-import {storeToken, useWebSocket} from "./useWebSocket";
-import {initialState, reducer} from "./gameReducer";
+import { useCallback, useEffect, useReducer, useRef } from "react";
+import { GamePhase, IncomingMessage } from "../types/game";
+import { storeToken, useWebSocket } from "./useWebSocket";
+import { initialState, reducer } from "./gameReducer";
 
 export function useGame() {
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -128,6 +128,10 @@ export function useGame() {
                     reason: msg.reason!,
                     mineCells: msg.mineCells ?? [],
                 });
+                break;
+            }
+            case "first_click_pending": {
+                dispatch({ type: "first_click_pending", x: msg.x!, y: msg.y! });
                 break;
             }
             case "opponent_disconnected": {

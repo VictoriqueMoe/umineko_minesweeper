@@ -1,5 +1,5 @@
-import {useCallback, useEffect, useRef, useState} from "react";
-import {IncomingMessage, OutgoingMessage} from "../types/game";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { IncomingMessage, OutgoingMessage } from "../types/game";
 
 const SESSION_KEY = "umineko_ms_token";
 const BASE_DELAY = 500;

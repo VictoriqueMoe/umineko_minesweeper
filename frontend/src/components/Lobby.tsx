@@ -1,8 +1,8 @@
 import * as React from "react";
-import {useState} from "react";
-import {GamePhase} from "../types/game";
-import {CHARACTERS} from "../characters";
-import {Spinner} from "./Spinner";
+import { useState } from "react";
+import { GamePhase } from "../types/game";
+import { CHARACTERS } from "../characters";
+import { Spinner } from "./Spinner";
 
 const DIFFICULTIES = [
     { value: "easy", label: "Easy", desc: "9\u00d79, 10 mines" },
@@ -20,13 +20,7 @@ interface LobbyProps {
     onCharacterPreview: (character: string) => void;
 }
 
-function CharacterSelector({
-    selected,
-    onSelect,
-}: {
-    selected: string;
-    onSelect: (id: string) => void;
-}) {
+function CharacterSelector({ selected, onSelect }: { selected: string; onSelect: (id: string) => void }) {
     return (
         <div className="character-selector">
             {CHARACTERS.map(c => (

@@ -1,17 +1,18 @@
 import * as React from "react";
-import {useEffect, useRef} from "react";
-import {BoardState, CellState, GamePhase} from "../types/game";
-import {Cell} from "./Cell";
-import {SparkleCanvas, SparkleHandle} from "./SparkleCanvas";
+import { useEffect, useRef } from "react";
+import { BoardState, CellState, GamePhase } from "../types/game";
+import { Cell } from "./Cell";
+import { SparkleCanvas, SparkleHandle } from "./SparkleCanvas";
 
 interface BoardProps {
     board: BoardState;
     phase: GamePhase;
+    pendingClick: { x: number; y: number } | null;
     onReveal: (x: number, y: number) => void;
     onFlag: (x: number, y: number) => void;
 }
 
-export function Board({ board, phase, onReveal, onFlag }: BoardProps) {
+export function Board({ board, phase, pendingClick, onReveal, onFlag }: BoardProps) {
     const disabled = phase !== GamePhase.Playing;
     const sparkleRef = useRef<SparkleHandle>(null);
     const prevRevealedRef = useRef<boolean[][] | null>(null);
@@ -67,10 +68,12 @@ export function Board({ board, phase, onReveal, onFlag }: BoardProps) {
     const rows = [];
     for (let y = 0; y < board.height; y++) {
         for (let x = 0; x < board.width; x++) {
+            const isPending = pendingClick !== null && pendingClick.x === x && pendingClick.y === y;
             rows.push(
                 <Cell
                     key={`${x}-${y}`}
                     cell={board.cells[y][x]}
+                    pending={isPending}
                     onClick={() => onReveal(x, y)}
                     onContextMenu={() => onFlag(x, y)}
                     disabled={disabled}

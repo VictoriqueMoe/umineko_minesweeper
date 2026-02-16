@@ -1,4 +1,4 @@
-import {BoardState, CellState} from "../types/game";
+import { BoardState, CellState } from "../types/game";
 import * as React from "react";
 
 interface MiniBoardProps {

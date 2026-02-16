@@ -1,13 +1,13 @@
-import {useCallback, useEffect, useState} from "react";
-import {GamePhase} from "./types/game";
-import {useGame} from "./hooks/useGame";
-import {Lobby} from "./components/Lobby";
-import {CharacterSelect} from "./components/CharacterSelect";
-import {Game} from "./components/Game";
-import {GameOver} from "./components/GameOver";
-import {DisconnectOverlay} from "./components/DisconnectOverlay";
-import {ConnectionLostOverlay} from "./components/ConnectionLostOverlay";
-import {Particles} from "./components/Particles";
+import { useCallback, useEffect, useState } from "react";
+import { GamePhase } from "./types/game";
+import { useGame } from "./hooks/useGame";
+import { Lobby } from "./components/Lobby";
+import { CharacterSelect } from "./components/CharacterSelect";
+import { Game } from "./components/Game";
+import { GameOver } from "./components/GameOver";
+import { DisconnectOverlay } from "./components/DisconnectOverlay";
+import { ConnectionLostOverlay } from "./components/ConnectionLostOverlay";
+import { Particles } from "./components/Particles";
 
 const THEME_CLASSES = ["theme-bernkastel", "theme-erika", "theme-lambdadelta"];
 
@@ -62,10 +62,7 @@ export function App() {
             )}
 
             {state.phase === GamePhase.CharacterSelect && (
-                <CharacterSelect
-                    hostCharacter={state.hostCharacter}
-                    onSelect={handleCharacterSelect}
-                />
+                <CharacterSelect hostCharacter={state.hostCharacter} onSelect={handleCharacterSelect} />
             )}
 
             {showBoard && state.myBoard && state.opponentBoard && (
@@ -75,6 +72,7 @@ export function App() {
                     opponentBoard={state.opponentBoard}
                     myCharacter={state.myCharacter}
                     opponentCharacter={state.opponentCharacter}
+                    pendingClick={state.pendingClick}
                     onReveal={reveal}
                     onFlag={flag}
                 />

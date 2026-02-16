@@ -306,62 +306,101 @@ body {
 
 .game-layout {
     display: flex;
-    gap: 2rem;
+    gap: 2.5rem;
     padding: 1rem 2rem 2rem;
     width: 100%;
-    max-width: 1200px;
     justify-content: center;
     align-items: flex-start;
 }
 
-.board-section {
+.board-column {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.75rem;
+}
+
+.fighter-banner {
+    width: 100%;
+    height: 250px;
     position: relative;
     overflow: hidden;
+    border: 1px solid var(--purple-muted);
+    border-bottom: 2px solid var(--gold-dark);
+    background: var(--bg-card);
 }
 
-.board-character-bg {
+.board-column:last-child .fighter-banner {
+    border-bottom-color: var(--purple-muted);
+}
+
+.fighter-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+}
+
+.fighter-nameplate {
     position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    height: 90%;
-    max-height: 500px;
-    opacity: 0.2;
-    pointer-events: none;
-    z-index: 0;
-    user-select: none;
-    mask-image: linear-gradient(to top, transparent 0%, black 30%);
-    -webkit-mask-image: linear-gradient(to top, transparent 0%, black 30%);
-}
-
-.board-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    position: relative;
-    z-index: 1;
-}
-
-.board-label {
+    bottom: 0.75rem;
+    left: 0;
+    right: 0;
+    text-align: center;
     font-family: var(--font-display);
-    font-size: 0.8rem;
-    font-weight: 500;
+    font-size: 1.1rem;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.15em;
     color: var(--gold);
+    text-shadow:
+        0 0 20px rgba(var(--gold-rgb), 0.6),
+        0 2px 10px rgba(0, 0, 0, 0.9);
 }
 
-.board-label.opponent {
+.fighter-nameplate.opponent {
     color: var(--purple-light);
+    text-shadow:
+        0 0 20px rgba(var(--purple-rgb), 0.6),
+        0 2px 10px rgba(0, 0, 0, 0.9);
+}
+
+.board-stats {
+    display: flex;
+    gap: 1.5rem;
+    padding: 0.25rem 0;
+}
+
+.stat-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.stat-label {
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+}
+
+.stat-value {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--gold-light);
+    letter-spacing: 0.05em;
+}
+
+.stat-value.flag {
+    color: var(--rose);
 }
 
 .board-wrapper {
     position: relative;
-    z-index: 1;
 }
 
 .sparkle-canvas {
@@ -421,6 +460,20 @@ body {
 .cell.hidden:hover {
     background: var(--bg-card-hover);
     box-shadow: inset 0 0 8px rgba(var(--gold-rgb), 0.08);
+}
+
+.pending-text {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--text-muted);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.cell.hidden.pending {
+    background: rgba(var(--gold-rgb), 0.15);
+    box-shadow: inset 0 0 12px rgba(var(--gold-rgb), 0.25);
+    animation: cellPending 1s ease-in-out infinite;
 }
 
 .cell.revealed {
@@ -517,30 +570,6 @@ body {
     background: var(--rose);
 }
 
-.game-info {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-    padding: 0.75rem 1.5rem;
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-}
-
-.game-info .stat {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.game-info .stat-value {
-    color: var(--gold-light);
-    font-weight: 600;
-}
-
 .game-over-overlay {
     position: fixed;
     inset: 0;
@@ -597,13 +626,6 @@ body {
     color: var(--rose);
     font-size: 0.9rem;
     margin-top: 0.5rem;
-}
-
-.divider {
-    width: 2px;
-    background: var(--purple-muted);
-    align-self: stretch;
-    min-height: 200px;
 }
 
 .disconnect-overlay {
@@ -885,6 +907,18 @@ body {
     }
 }
 
+@keyframes cellPending {
+    0%,
+    100% {
+        background: rgba(var(--gold-rgb), 0.1);
+        box-shadow: inset 0 0 8px rgba(var(--gold-rgb), 0.15);
+    }
+    50% {
+        background: rgba(var(--gold-rgb), 0.2);
+        box-shadow: inset 0 0 16px rgba(var(--gold-rgb), 0.35);
+    }
+}
+
 @keyframes cellDenied {
     0%,
     100% {
@@ -915,15 +949,14 @@ body {
         flex-direction: column;
         align-items: center;
         padding: 1rem;
+        gap: 1.5rem;
+    }
+
+    .fighter-banner {
+        height: 180px;
     }
 
     .board.main {
         --cell-size: 24px;
-    }
-
-    .divider {
-        width: 80%;
-        height: 2px;
-        min-height: unset;
     }
 }

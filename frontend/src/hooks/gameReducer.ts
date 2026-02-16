@@ -1,12 +1,20 @@
-import {BoardState, CellData, CellState, ClientCell, GamePhase, GameState} from "../types/game";
-import {clearToken} from "./useWebSocket";
+import { BoardState, CellData, CellState, ClientCell, GamePhase, GameState } from "../types/game";
+import { clearToken } from "./useWebSocket";
 
 export type Action =
     | { type: "game_created"; code: string }
     | { type: "join_pending"; code: string; hostCharacter: string }
     | { type: "player_joined"; playerNumber: number }
     | { type: "game_start"; width: number; height: number; mines: number; characters: string[] }
-    | { type: "reconnected"; code: string; playerNumber: number; width: number; height: number; mines: number; characters: string[] }
+    | {
+          type: "reconnected";
+          code: string;
+          playerNumber: number;
+          width: number;
+          height: number;
+          mines: number;
+          characters: string[];
+      }
     | { type: "cells_revealed"; player: number; cells: CellData[] }
     | { type: "cell_flagged"; player: number; x: number; y: number; flagged: boolean }
     | { type: "game_over"; winner: number; loser: number; reason: string; mineCells: CellData[] }
@@ -15,6 +23,7 @@ export type Action =
     | { type: "opponent_disconnected"; countdown: number }
     | { type: "opponent_reconnected" }
     | { type: "countdown_tick" }
+    | { type: "first_click_pending"; x: number; y: number }
     | { type: "error"; message: string }
     | { type: "reset" };
 
@@ -34,6 +43,7 @@ export const initialState: GameState = {
     disconnectCountdown: 0,
     pendingMineCells: [],
     triggeredMine: null,
+    pendingClick: null,
 };
 
 function createBoard(width: number, height: number, mines: number): BoardState {
@@ -118,6 +128,12 @@ export function reducer(state: GameState, action: Action): GameState {
                 disconnectCountdown: 0,
             };
         }
+        case "first_click_pending": {
+            return {
+                ...state,
+                pendingClick: { x: action.x, y: action.y },
+            };
+        }
         case "cells_revealed": {
             const isMe = action.player === state.playerNumber;
             const board = isMe ? state.myBoard : state.opponentBoard;
@@ -148,7 +164,7 @@ export function reducer(state: GameState, action: Action): GameState {
 
             const newBoard = { ...board, cells: newCells };
             if (isMe) {
-                return { ...state, myBoard: newBoard };
+                return { ...state, myBoard: newBoard, pendingClick: null };
             }
             return { ...state, opponentBoard: newBoard };
         }
