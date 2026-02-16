@@ -1,6 +1,6 @@
 # Umineko Minesweeper
 
-A real-time multiplayer Minesweeper game themed around characters from *Umineko When They Cry*. Two players compete simultaneously on the same board — reveal all safe cells before your opponent does and doesn't hit a mine.
+A real-time multiplayer Minesweeper game themed around characters from *Umineko When They Cry*. Two players compete simultaneously on the same board, reveal all safe cells before your opponent does and doesn't hit a mine.
 
 ## Features
 
