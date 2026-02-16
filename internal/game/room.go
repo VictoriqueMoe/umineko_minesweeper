@@ -9,18 +9,42 @@ import (
 	"time"
 )
 
+type Difficulty string
+
 const (
-	DefaultWidth  = 16
-	DefaultHeight = 16
-	DefaultMines  = 40
-	CodeLength    = 6
+	Easy   Difficulty = "easy"
+	Medium Difficulty = "medium"
+	Hard   Difficulty = "hard"
+
+	CodeLength = 6
 )
+
+type difficultyConfig struct {
+	Width  int
+	Height int
+	Mines  int
+}
+
+var difficulties = map[Difficulty]difficultyConfig{
+	Easy:   {Width: 9, Height: 9, Mines: 10},
+	Medium: {Width: 16, Height: 16, Mines: 40},
+	Hard:   {Width: 30, Height: 16, Mines: 99},
+}
+
+func GetDifficultyConfig(d Difficulty) (int, int, int) {
+	cfg, ok := difficulties[d]
+	if !ok {
+		cfg = difficulties[Medium]
+	}
+	return cfg.Width, cfg.Height, cfg.Mines
+}
 
 type (
 	Room struct {
 		Game         *Game
 		PlayerCount  int
 		PlayerTokens [2]string
+		Characters   [2]string
 	}
 
 	RoomManager struct {
@@ -35,13 +59,14 @@ func NewRoomManager() *RoomManager {
 	}
 }
 
-func (rm *RoomManager) CreateRoom() (*Room, string) {
+func (rm *RoomManager) CreateRoom(difficulty Difficulty) (*Room, string) {
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
 
 	code := rm.generateCode()
 	seed := time.Now().UnixNano()
-	game := NewGame(code, DefaultWidth, DefaultHeight, DefaultMines, seed)
+	width, height, mines := GetDifficultyConfig(difficulty)
+	game := NewGame(code, width, height, mines, seed)
 
 	room := &Room{
 		Game:        game,
@@ -99,6 +124,23 @@ func (rm *RoomManager) SetPlayerToken(code string, player int, token string) {
 	if room, exists := rm.rooms[code]; exists {
 		room.PlayerTokens[player] = token
 	}
+}
+
+func (rm *RoomManager) SetCharacter(code string, player int, character string) {
+	rm.mu.Lock()
+	defer rm.mu.Unlock()
+	if room, exists := rm.rooms[code]; exists {
+		room.Characters[player] = character
+	}
+}
+
+func (rm *RoomManager) GetHostCharacter(code string) string {
+	rm.mu.RLock()
+	defer rm.mu.RUnlock()
+	if room, exists := rm.rooms[code]; exists {
+		return room.Characters[0]
+	}
+	return ""
 }
 
 func (rm *RoomManager) generateCode() string {

@@ -1,12 +1,14 @@
 import {BoardState, CellState, GamePhase} from "../types/game";
 import {Board} from "./Board";
 import {MiniBoard} from "./MiniBoard";
+import {CHARACTERS} from "../characters";
 
 interface GameProps {
     phase: GamePhase;
-    playerNumber: number;
     myBoard: BoardState;
     opponentBoard: BoardState;
+    myCharacter: string;
+    opponentCharacter: string;
     onReveal: (x: number, y: number) => void;
     onFlag: (x: number, y: number) => void;
 }
@@ -35,18 +37,22 @@ function countFlagged(board: BoardState): number {
     return count;
 }
 
-export function Game({ phase, playerNumber, myBoard, opponentBoard, onReveal, onFlag }: GameProps) {
+function findCharacter(id: string) {
+    return CHARACTERS.find(c => c.id === id);
+}
+
+export function Game({ phase, myBoard, opponentBoard, myCharacter, opponentCharacter, onReveal, onFlag }: GameProps) {
     const totalSafe = myBoard.width * myBoard.height - myBoard.mines;
     const myRevealed = countRevealed(myBoard);
     const opRevealed = countRevealed(opponentBoard);
     const myFlagged = countFlagged(myBoard);
 
+    const myChar = findCharacter(myCharacter);
+    const opChar = findCharacter(opponentCharacter);
+
     return (
         <>
             <div className="game-info">
-                <div className="stat">
-                    Player <span className="stat-value">{playerNumber + 1}</span>
-                </div>
                 <div className="stat">
                     Progress{" "}
                     <span className="stat-value">
@@ -69,14 +75,20 @@ export function Game({ phase, playerNumber, myBoard, opponentBoard, onReveal, on
 
             <div className="game-layout">
                 <div className="board-section">
-                    <div className="board-label">Your Board</div>
+                    {myChar && <img className="board-character-bg" src={myChar.image} alt="" />}
+                    <div className="board-header">
+                        <div className="board-label">{myChar?.name ?? "Your Board"}</div>
+                    </div>
                     <Board board={myBoard} phase={phase} onReveal={onReveal} onFlag={onFlag} />
                 </div>
 
                 <div className="divider" />
 
-                <div className="board-section">
-                    <div className="board-label opponent">Opponent</div>
+                <div className={`board-section${opponentCharacter ? ` theme-${opponentCharacter}` : ""}`}>
+                    {opChar && <img className="board-character-bg" src={opChar.image} alt="" />}
+                    <div className="board-header">
+                        <div className="board-label opponent">{opChar?.name ?? "Opponent"}</div>
+                    </div>
                     <MiniBoard board={opponentBoard} />
                 </div>
             </div>

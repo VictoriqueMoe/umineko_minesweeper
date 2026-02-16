@@ -19,8 +19,8 @@ body {
     color: var(--text);
     min-height: 100vh;
     background-image:
-        radial-gradient(ellipse at 30% 20%, rgba(107, 76, 154, 0.08) 0%, transparent 60%),
-        radial-gradient(ellipse at 70% 80%, rgba(212, 168, 75, 0.04) 0%, transparent 60%);
+        radial-gradient(ellipse at 30% 20%, rgba(var(--purple-rgb), 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 80%, rgba(var(--gold-rgb), 0.04) 0%, transparent 60%);
     background-attachment: fixed;
     overflow-x: hidden;
 }
@@ -100,6 +100,117 @@ body {
     font-style: italic;
     margin-bottom: 1.5rem;
     line-height: 1.6;
+}
+
+.character-selector {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+.character-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 0.5rem;
+    background: linear-gradient(135deg, var(--bg-card), rgba(var(--bg-card-rgb), 0.6));
+    border: 1px solid var(--purple-muted);
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out);
+    overflow: hidden;
+}
+
+.character-card:hover {
+    border-color: var(--gold-dark);
+    transform: translateY(-2px);
+}
+
+.character-card.selected {
+    border-color: var(--gold);
+    border-width: 2px;
+    background: linear-gradient(135deg, rgba(var(--gold-rgb), 0.08), rgba(var(--bg-card-rgb), 0.8));
+    box-shadow: 0 0 20px rgba(var(--gold-rgb), 0.15);
+}
+
+.character-portrait {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 50%;
+    border: 2px solid var(--purple-muted);
+    transition: border-color 0.3s var(--ease-out);
+}
+
+.character-card.selected .character-portrait {
+    border-color: var(--gold);
+}
+
+.character-name {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    transition: color 0.3s var(--ease-out);
+}
+
+.character-card.selected .character-name {
+    color: var(--gold);
+}
+
+.difficulty-selector {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.difficulty-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem 0.5rem;
+    background: transparent;
+    border: 1px solid var(--purple-muted);
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+}
+
+.difficulty-option:hover {
+    border-color: var(--gold-dark);
+}
+
+.difficulty-option.selected {
+    border-color: var(--gold);
+    background: rgba(var(--gold-rgb), 0.08);
+    box-shadow: 0 0 15px rgba(var(--gold-rgb), 0.1);
+}
+
+.difficulty-label {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    transition: color 0.2s var(--ease-out);
+}
+
+.difficulty-option.selected .difficulty-label {
+    color: var(--gold);
+}
+
+.difficulty-desc {
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    opacity: 0.7;
 }
 
 .lobby-input {
@@ -208,6 +319,31 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 0.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.board-character-bg {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 90%;
+    max-height: 500px;
+    opacity: 0.2;
+    pointer-events: none;
+    z-index: 0;
+    user-select: none;
+    mask-image: linear-gradient(to top, transparent 0%, black 30%);
+    -webkit-mask-image: linear-gradient(to top, transparent 0%, black 30%);
+}
+
+.board-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+    z-index: 1;
 }
 
 .board-label {
@@ -225,6 +361,7 @@ body {
 
 .board-wrapper {
     position: relative;
+    z-index: 1;
 }
 
 .sparkle-canvas {
@@ -253,6 +390,8 @@ body {
     --cell-size: 16px;
     grid-template-columns: repeat(var(--cols), var(--cell-size));
     grid-template-rows: repeat(var(--rows), var(--cell-size));
+    position: relative;
+    z-index: 1;
 }
 
 .board.exploding {
@@ -528,6 +667,106 @@ body {
     border-radius: 50%;
     margin: 1.5rem auto;
     animation: spin 0.8s linear infinite;
+}
+
+.character-select-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1.5rem;
+    max-width: 800px;
+    width: 100%;
+    animation: fadeInUp 0.5s var(--ease-out);
+}
+
+.character-select-screen h2 {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+}
+
+.character-select-screen p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    font-style: italic;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.character-select-grid {
+    display: flex;
+    gap: 1.5rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.character-select-card {
+    flex: 1;
+    max-width: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 1rem;
+    background: linear-gradient(135deg, var(--bg-card), rgba(var(--bg-card-rgb), 0.6));
+    border: 1px solid var(--purple-muted);
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out);
+    position: relative;
+}
+
+.character-select-card:hover:not(:disabled) {
+    border-color: var(--gold);
+    transform: translateY(-4px);
+    box-shadow: 0 0 25px rgba(var(--gold-rgb), 0.2);
+}
+
+.character-select-card.taken {
+    opacity: 0.35;
+    cursor: not-allowed;
+    filter: grayscale(0.7);
+}
+
+.character-select-portrait {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 50%;
+    border: 2px solid var(--purple-muted);
+    transition: border-color 0.3s var(--ease-out);
+}
+
+.character-select-card:hover:not(:disabled) .character-select-portrait {
+    border-color: var(--gold);
+}
+
+.character-select-name {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    transition: color 0.3s var(--ease-out);
+}
+
+.character-select-card:hover:not(:disabled) .character-select-name {
+    color: var(--gold);
+}
+
+.character-taken-label {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--rose);
+    position: absolute;
+    bottom: 0.5rem;
 }
 
 @keyframes spin {

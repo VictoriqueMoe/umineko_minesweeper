@@ -1,19 +1,57 @@
 import * as React from "react";
 import {useState} from "react";
 import {GamePhase} from "../types/game";
+import {CHARACTERS} from "../characters";
 import {Spinner} from "./Spinner";
+
+const DIFFICULTIES = [
+    { value: "easy", label: "Easy", desc: "9\u00d79, 10 mines" },
+    { value: "medium", label: "Medium", desc: "16\u00d716, 40 mines" },
+    { value: "hard", label: "Hard", desc: "30\u00d716, 99 mines" },
+] as const;
 
 interface LobbyProps {
     phase: GamePhase;
     roomCode: string;
     error: string;
     connected: boolean;
-    onCreateGame: () => void;
+    onCreateGame: (difficulty: string, character: string) => void;
     onJoinGame: (code: string) => void;
+    onCharacterPreview: (character: string) => void;
 }
 
-export function Lobby({ phase, roomCode, error, connected, onCreateGame, onJoinGame }: LobbyProps) {
+function CharacterSelector({
+    selected,
+    onSelect,
+}: {
+    selected: string;
+    onSelect: (id: string) => void;
+}) {
+    return (
+        <div className="character-selector">
+            {CHARACTERS.map(c => (
+                <button
+                    key={c.id}
+                    className={`character-card${selected === c.id ? " selected" : ""}`}
+                    onClick={() => onSelect(c.id)}
+                >
+                    <img className="character-portrait" src={c.image} alt={c.name} />
+                    <span className="character-name">{c.name}</span>
+                </button>
+            ))}
+        </div>
+    );
+}
+
+export function Lobby({ phase, roomCode, error, connected, onCreateGame, onJoinGame, onCharacterPreview }: LobbyProps) {
     const [joinCode, setJoinCode] = useState("");
+    const [difficulty, setDifficulty] = useState("medium");
+    const [createCharacter, setCreateCharacter] = useState("");
+
+    const handleCreateCharacterSelect = (id: string) => {
+        setCreateCharacter(id);
+        onCharacterPreview(id);
+    };
 
     const handleJoin = () => {
         const trimmed = joinCode.trim();
@@ -46,15 +84,32 @@ export function Lobby({ phase, roomCode, error, connected, onCreateGame, onJoinG
         <div className="lobby">
             <div className="lobby-card">
                 <h2>Create a Game</h2>
-                <p>Start a new game and invite your opponent with a code.</p>
-                <button className="btn btn-primary" onClick={onCreateGame} disabled={!connected}>
+                <p>Choose your character and start a new game.</p>
+                <CharacterSelector selected={createCharacter} onSelect={handleCreateCharacterSelect} />
+                <div className="difficulty-selector">
+                    {DIFFICULTIES.map(d => (
+                        <button
+                            key={d.value}
+                            className={`difficulty-option${difficulty === d.value ? " selected" : ""}`}
+                            onClick={() => setDifficulty(d.value)}
+                        >
+                            <span className="difficulty-label">{d.label}</span>
+                            <span className="difficulty-desc">{d.desc}</span>
+                        </button>
+                    ))}
+                </div>
+                <button
+                    className="btn btn-primary"
+                    onClick={() => onCreateGame(difficulty, createCharacter)}
+                    disabled={!connected || !createCharacter}
+                >
                     Create Game
                 </button>
             </div>
 
             <div className="lobby-card">
                 <h2>Join a Game</h2>
-                <p>Enter the code shared by your opponent.</p>
+                <p>Enter the room code from your opponent.</p>
                 <input
                     className="lobby-input"
                     type="text"

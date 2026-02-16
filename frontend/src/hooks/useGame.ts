@@ -65,6 +65,14 @@ export function useGame() {
                 dispatch({ type: "game_created", code: msg.code! });
                 break;
             }
+            case "join_pending": {
+                dispatch({
+                    type: "join_pending",
+                    code: msg.code!,
+                    hostCharacter: msg.hostCharacter!,
+                });
+                break;
+            }
             case "player_joined": {
                 if (msg.token) {
                     storeToken(msg.token);
@@ -78,6 +86,7 @@ export function useGame() {
                     width: msg.width!,
                     height: msg.height!,
                     mines: msg.mines!,
+                    characters: msg.characters ?? [],
                 });
                 break;
             }
@@ -89,6 +98,7 @@ export function useGame() {
                     width: msg.width!,
                     height: msg.height!,
                     mines: msg.mines!,
+                    characters: msg.characters ?? [],
                 });
                 break;
             }
@@ -137,13 +147,23 @@ export function useGame() {
 
     const { send, connected } = useWebSocket(onMessage);
 
-    const createGame = useCallback(() => {
-        send({ type: "create_game" });
-    }, [send]);
+    const createGame = useCallback(
+        (difficulty: string, character: string) => {
+            send({ type: "create_game", difficulty, character });
+        },
+        [send],
+    );
 
     const joinGame = useCallback(
         (code: string) => {
             send({ type: "join_game", code });
+        },
+        [send],
+    );
+
+    const selectCharacter = useCallback(
+        (character: string) => {
+            send({ type: "select_character", character });
         },
         [send],
     );
@@ -171,6 +191,7 @@ export function useGame() {
         connected,
         createGame,
         joinGame,
+        selectCharacter,
         reveal,
         flag,
         reset,

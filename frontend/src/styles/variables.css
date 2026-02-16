@@ -23,6 +23,8 @@
     --bg-card-rgb: 21, 13, 36;
     --hover-glow: 0.1;
 
+    --particle-hue: 35;
+
     --cell-1: #7eb3f0;
     --cell-2: #5ab87a;
     --cell-3: #e05555;
@@ -31,4 +33,67 @@
     --cell-6: #4ecdc4;
     --cell-7: #e8e0f0;
     --cell-8: #a89bb8;
+}
+
+.theme-bernkastel {
+    --bg-void: #06090f;
+    --bg-purple: #0a1020;
+    --bg-card: #0c1424;
+    --bg-card-hover: #101a30;
+    --gold: #4a90d9;
+    --gold-light: #7eb3f0;
+    --gold-dark: #2a5a9a;
+    --purple: #3d5a80;
+    --purple-light: #7eb3f0;
+    --purple-muted: #1a3050;
+    --text: #e0eaf5;
+    --text-muted: #9bb5d0;
+
+    --gold-rgb: 74, 144, 217;
+    --purple-rgb: 61, 90, 128;
+    --bg-card-rgb: 12, 20, 36;
+
+    --particle-hue: 215;
+}
+
+.theme-erika {
+    --bg-void: #060a0f;
+    --bg-purple: #081420;
+    --bg-card: #0a1824;
+    --bg-card-hover: #0e2030;
+    --gold: #00b4d8;
+    --gold-light: #48cae4;
+    --gold-dark: #0077b6;
+    --purple: #2a5a80;
+    --purple-light: #48cae4;
+    --purple-muted: #153045;
+    --text: #e0f0f5;
+    --text-muted: #90c0d8;
+
+    --gold-rgb: 0, 180, 216;
+    --purple-rgb: 42, 90, 128;
+    --bg-card-rgb: 10, 24, 36;
+
+    --particle-hue: 190;
+}
+
+.theme-lambdadelta {
+    --bg-void: #120810;
+    --bg-purple: #1f0a1a;
+    --bg-card: #1a0815;
+    --bg-card-hover: #25101e;
+    --gold: #ff69b4;
+    --gold-light: #ffb6d9;
+    --gold-dark: #d4458a;
+    --purple: #9a4a7a;
+    --purple-light: #ffb6d9;
+    --purple-muted: #4d2040;
+    --text: #f5e0ef;
+    --text-muted: #d09bb8;
+
+    --gold-rgb: 255, 105, 180;
+    --purple-rgb: 154, 74, 122;
+    --bg-card-rgb: 26, 8, 21;
+
+    --particle-hue: 330;
 }

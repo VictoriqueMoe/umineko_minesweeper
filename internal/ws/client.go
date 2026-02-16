@@ -22,6 +22,7 @@ type Client struct {
 	RoomCode     string
 	PlayerNumber int
 	Token        string
+	PendingJoin  bool
 }
 
 func NewClient(hub *Hub, conn *websocket.Conn) *Client {

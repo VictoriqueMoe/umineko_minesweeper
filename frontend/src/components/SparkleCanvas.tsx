@@ -12,6 +12,11 @@ interface Sparkle {
     lightness: number;
 }
 
+function getParticleHue(): number {
+    const val = getComputedStyle(document.documentElement).getPropertyValue("--particle-hue").trim();
+    return val ? parseFloat(val) : 35;
+}
+
 export interface SparkleHandle {
     burst: (cx: number, cy: number, count: number) => void;
 }
@@ -77,29 +82,33 @@ export const SparkleCanvas = forwardRef<SparkleHandle>(function SparkleCanvas(_,
         };
     }, []);
 
-    useImperativeHandle(ref, () => ({
-        burst(cx: number, cy: number, count: number) {
-            for (let i = 0; i < count; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const speed = 0.5 + Math.random() * 2.5;
-                sparklesRef.current.push({
-                    x: cx + (Math.random() - 0.5) * 6,
-                    y: cy + (Math.random() - 0.5) * 6,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    life: 0,
-                    maxLife: 30 + Math.random() * 30,
-                    size: 1.5 + Math.random() * 2.5,
-                    hue: 35 + Math.random() * 25,
-                    lightness: 60 + Math.random() * 20,
-                });
-            }
-            if (!runningRef.current) {
-                runningRef.current = true;
-                animRef.current = requestAnimationFrame(drawRef.current);
-            }
-        },
-    }), []);
+    useImperativeHandle(
+        ref,
+        () => ({
+            burst(cx: number, cy: number, count: number) {
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 0.5 + Math.random() * 2.5;
+                    sparklesRef.current.push({
+                        x: cx + (Math.random() - 0.5) * 6,
+                        y: cy + (Math.random() - 0.5) * 6,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        life: 0,
+                        maxLife: 30 + Math.random() * 30,
+                        size: 1.5 + Math.random() * 2.5,
+                        hue: getParticleHue() + Math.random() * 25,
+                        lightness: 60 + Math.random() * 20,
+                    });
+                }
+                if (!runningRef.current) {
+                    runningRef.current = true;
+                    animRef.current = requestAnimationFrame(drawRef.current);
+                }
+            },
+        }),
+        [],
+    );
 
     useEffect(() => {
         const canvas = canvasRef.current;

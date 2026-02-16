@@ -14,6 +14,11 @@ interface Particle {
 
 const CHARS = ["\u2726", "\u2727", "\u2729", "\u271B", "\u2730"];
 
+function getParticleHue(): number {
+    const val = getComputedStyle(document.documentElement).getPropertyValue("--particle-hue").trim();
+    return val ? parseFloat(val) : 35;
+}
+
 export function Particles() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const particlesRef = useRef<Particle[]>([]);
@@ -50,7 +55,7 @@ export function Particles() {
                 maxLife: 400 + Math.random() * 300,
                 size: 8 + Math.random() * 10,
                 char: CHARS[Math.floor(Math.random() * CHARS.length)],
-                hue: 35 + Math.random() * 20,
+                hue: getParticleHue() + Math.random() * 20,
             });
         };
 

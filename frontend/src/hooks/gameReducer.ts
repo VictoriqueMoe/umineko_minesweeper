@@ -3,9 +3,10 @@ import {clearToken} from "./useWebSocket";
 
 export type Action =
     | { type: "game_created"; code: string }
+    | { type: "join_pending"; code: string; hostCharacter: string }
     | { type: "player_joined"; playerNumber: number }
-    | { type: "game_start"; width: number; height: number; mines: number }
-    | { type: "reconnected"; code: string; playerNumber: number; width: number; height: number; mines: number }
+    | { type: "game_start"; width: number; height: number; mines: number; characters: string[] }
+    | { type: "reconnected"; code: string; playerNumber: number; width: number; height: number; mines: number; characters: string[] }
     | { type: "cells_revealed"; player: number; cells: CellData[] }
     | { type: "cell_flagged"; player: number; x: number; y: number; flagged: boolean }
     | { type: "game_over"; winner: number; loser: number; reason: string; mineCells: CellData[] }
@@ -21,11 +22,14 @@ export const initialState: GameState = {
     phase: GamePhase.Lobby,
     playerNumber: -1,
     roomCode: "",
+    myCharacter: "",
+    opponentCharacter: "",
     myBoard: null,
     opponentBoard: null,
     winner: -1,
     reason: "",
     error: "",
+    hostCharacter: "",
     opponentDisconnected: false,
     disconnectCountdown: 0,
     pendingMineCells: [],
@@ -67,6 +71,16 @@ export function reducer(state: GameState, action: Action): GameState {
                 error: "",
             };
         }
+        case "join_pending": {
+            return {
+                ...state,
+                phase: GamePhase.CharacterSelect,
+                roomCode: action.code,
+                hostCharacter: action.hostCharacter,
+                playerNumber: 1,
+                error: "",
+            };
+        }
         case "player_joined": {
             return {
                 ...state,
@@ -74,20 +88,29 @@ export function reducer(state: GameState, action: Action): GameState {
             };
         }
         case "game_start": {
+            const chars = action.characters ?? [];
+            const myIdx = state.playerNumber;
+            const opIdx = myIdx === 0 ? 1 : 0;
             return {
                 ...state,
                 phase: GamePhase.Playing,
+                myCharacter: chars[myIdx] ?? "",
+                opponentCharacter: chars[opIdx] ?? "",
                 myBoard: createBoard(action.width, action.height, action.mines),
                 opponentBoard: createBoard(action.width, action.height, action.mines),
                 error: "",
             };
         }
         case "reconnected": {
+            const chars = action.characters ?? [];
+            const opIdx = action.playerNumber === 0 ? 1 : 0;
             return {
                 ...state,
                 phase: GamePhase.Playing,
                 playerNumber: action.playerNumber,
                 roomCode: action.code,
+                myCharacter: chars[action.playerNumber] ?? "",
+                opponentCharacter: chars[opIdx] ?? "",
                 myBoard: createBoard(action.width, action.height, action.mines),
                 opponentBoard: createBoard(action.width, action.height, action.mines),
                 error: "",

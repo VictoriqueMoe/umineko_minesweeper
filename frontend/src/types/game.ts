@@ -1,10 +1,12 @@
 export type MessageType =
     | "create_game"
     | "join_game"
+    | "select_character"
     | "reconnect"
     | "reveal"
     | "flag"
     | "game_created"
+    | "join_pending"
     | "player_joined"
     | "game_start"
     | "cells_revealed"
@@ -16,9 +18,11 @@ export type MessageType =
     | "error";
 
 export interface OutgoingMessage {
-    type: "create_game" | "join_game" | "reconnect" | "reveal" | "flag";
+    type: "create_game" | "join_game" | "select_character" | "reconnect" | "reveal" | "flag";
     code?: string;
     token?: string;
+    difficulty?: string;
+    character?: string;
     x?: number;
     y?: number;
 }
@@ -42,6 +46,8 @@ export interface IncomingMessage {
     message?: string;
     countdown?: number;
     mineCells?: CellData[];
+    characters?: string[];
+    hostCharacter?: string;
 }
 
 export interface CellData {
@@ -66,6 +72,7 @@ export interface ClientCell {
 export enum GamePhase {
     Lobby,
     Waiting,
+    CharacterSelect,
     Playing,
     Exploding,
     Finished,
@@ -82,6 +89,8 @@ export interface GameState {
     phase: GamePhase;
     playerNumber: number;
     roomCode: string;
+    myCharacter: string;
+    opponentCharacter: string;
     myBoard: BoardState | null;
     opponentBoard: BoardState | null;
     winner: number;
@@ -89,6 +98,7 @@ export interface GameState {
     error: string;
     opponentDisconnected: boolean;
     disconnectCountdown: number;
+    hostCharacter: string;
     pendingMineCells: CellData[];
     triggeredMine: CellData | null;
 }
