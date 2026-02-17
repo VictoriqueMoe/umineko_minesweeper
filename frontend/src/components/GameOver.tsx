@@ -159,7 +159,7 @@ export function GameOver({ won, reason, myCharacter, opponentCharacter, onPlayAg
                         />
                     )}
                     <div className={`showdown-label ${won ? "win" : "lose"}`}>
-                        {won ? "WIN" : "LOSE"}
+                        {won ? `${myChar?.name ?? "You"} Wins` : "Defeat"}
                     </div>
                 </div>
                 <div className="showdown-vs">VS</div>
@@ -173,7 +173,7 @@ export function GameOver({ won, reason, myCharacter, opponentCharacter, onPlayAg
                         />
                     )}
                     <div className={`showdown-label ${won ? "lose" : "win"}`}>
-                        {won ? "LOSE" : "WIN"}
+                        {won ? "Defeat" : `${opChar?.name ?? "Opponent"} Wins`}
                     </div>
                 </div>
             </div>
