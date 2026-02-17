@@ -86,6 +86,23 @@ export interface BoardState {
     cells: ClientCell[][];
 }
 
+export type Mood =
+    | "default"
+    | "neutral"
+    | "happy"
+    | "very_happy"
+    | "smirk"
+    | "worried"
+    | "sweating"
+    | "angry"
+    | "furious"
+    | "surprised"
+    | "relieved"
+    | "bored"
+    | "wink"
+    | "win"
+    | "lose";
+
 export interface GameState {
     phase: GamePhase;
     playerNumber: number;

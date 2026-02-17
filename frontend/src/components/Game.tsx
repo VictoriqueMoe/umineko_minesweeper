@@ -1,7 +1,9 @@
-import { BoardState, CellState, GamePhase } from "../types/game";
-import { Board } from "./Board";
-import { MiniBoard } from "./MiniBoard";
-import { CHARACTERS } from "../characters";
+import {useEffect} from "react";
+import {BoardState, CellState, GamePhase} from "../types/game";
+import {Board} from "./Board";
+import {MiniBoard} from "./MiniBoard";
+import {CharacterDef, CHARACTERS, Expression} from "../characters";
+import {useCharacterMood} from "../hooks/useCharacterMood";
 
 interface GameProps {
     phase: GamePhase;
@@ -10,6 +12,8 @@ interface GameProps {
     myCharacter: string;
     opponentCharacter: string;
     pendingClick: { x: number; y: number } | null;
+    winner: number;
+    playerNumber: number;
     onReveal: (x: number, y: number) => void;
     onFlag: (x: number, y: number) => void;
 }
@@ -38,8 +42,15 @@ function countFlagged(board: BoardState): number {
     return count;
 }
 
-function findCharacter(id: string) {
+function findCharacter(id: string): CharacterDef | undefined {
     return CHARACTERS.find(c => c.id === id);
+}
+
+function preloadCharacterImages(charDef: CharacterDef) {
+    for (const expr of Object.values(charDef.expressions) as Expression[]) {
+        const img = new Image();
+        img.src = expr.image;
+    }
 }
 
 export function Game({
@@ -49,6 +60,8 @@ export function Game({
     myCharacter,
     opponentCharacter,
     pendingClick,
+    winner,
+    playerNumber,
     onReveal,
     onFlag,
 }: GameProps) {
@@ -60,8 +73,24 @@ export function Game({
     const myChar = findCharacter(myCharacter);
     const opChar = findCharacter(opponentCharacter);
 
-    const flipLeft = myChar && myChar.facing === "left";
-    const flipRight = opChar && opChar.facing === "right";
+    const { myExpr, opExpr } = useCharacterMood({
+        phase,
+        myBoard,
+        opponentBoard,
+        winner,
+        playerNumber,
+        myCharacter: myChar,
+        opponentCharacter: opChar,
+    });
+
+    useEffect(() => {
+        if (myChar) {
+            preloadCharacterImages(myChar);
+        }
+        if (opChar) {
+            preloadCharacterImages(opChar);
+        }
+    }, [myChar, opChar]);
 
     return (
         <div className="game-layout">
@@ -70,9 +99,9 @@ export function Game({
                     {myChar && (
                         <img
                             className="fighter-img"
-                            src={myChar.image}
+                            src={myExpr.image}
                             alt={myChar.name}
-                            style={flipLeft ? { transform: "scaleX(-1)" } : undefined}
+                            style={myExpr.facing === "left" ? { transform: "scaleX(-1)" } : undefined}
                         />
                     )}
                     <div className="fighter-nameplate">{myChar?.name ?? "You"}</div>
@@ -100,9 +129,9 @@ export function Game({
                     {opChar && (
                         <img
                             className="fighter-img"
-                            src={opChar.image}
+                            src={opExpr.image}
                             alt={opChar.name}
-                            style={flipRight ? { transform: "scaleX(-1)" } : undefined}
+                            style={opExpr.facing === "right" ? { transform: "scaleX(-1)" } : undefined}
                         />
                     )}
                     <div className="fighter-nameplate opponent">{opChar?.name ?? "Opponent"}</div>

@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
-import { GamePhase } from "./types/game";
-import { useGame } from "./hooks/useGame";
-import { Lobby } from "./components/Lobby";
-import { CharacterSelect } from "./components/CharacterSelect";
-import { Game } from "./components/Game";
-import { GameOver } from "./components/GameOver";
-import { DisconnectOverlay } from "./components/DisconnectOverlay";
-import { ConnectionLostOverlay } from "./components/ConnectionLostOverlay";
-import { Particles } from "./components/Particles";
+import {useCallback, useEffect, useState} from "react";
+import {GamePhase} from "./types/game";
+import {useGame} from "./hooks/useGame";
+import {Lobby} from "./components/Lobby";
+import {CharacterSelect} from "./components/CharacterSelect";
+import {Game} from "./components/Game";
+import {GameOver} from "./components/GameOver";
+import {DisconnectOverlay} from "./components/DisconnectOverlay";
+import {ConnectionLostOverlay} from "./components/ConnectionLostOverlay";
+import {Particles} from "./components/Particles";
 
 const THEME_CLASSES = ["theme-bernkastel", "theme-erika", "theme-lambdadelta"];
 
@@ -73,13 +73,21 @@ export function App() {
                     myCharacter={state.myCharacter}
                     opponentCharacter={state.opponentCharacter}
                     pendingClick={state.pendingClick}
+                    winner={state.winner}
+                    playerNumber={state.playerNumber}
                     onReveal={reveal}
                     onFlag={flag}
                 />
             )}
 
             {state.phase === GamePhase.Finished && (
-                <GameOver won={state.winner === state.playerNumber} reason={state.reason} onPlayAgain={handleReset} />
+                <GameOver
+                    won={state.winner === state.playerNumber}
+                    reason={state.reason}
+                    myCharacter={state.myCharacter}
+                    opponentCharacter={state.opponentCharacter}
+                    onPlayAgain={handleReset}
+                />
             )}
 
             {state.opponentDisconnected && state.phase === GamePhase.Playing && (
