@@ -724,6 +724,149 @@ body {
     }
 }
 
+.vs-intro-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: fadeIn 0.3s var(--ease-out);
+    transition: opacity 0.5s var(--ease-out);
+}
+
+.vs-intro-overlay.fade-out {
+    opacity: 0;
+}
+
+.vs-intro-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 101;
+    pointer-events: none;
+}
+
+.vs-intro-fighters {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    z-index: 102;
+}
+
+.vs-intro-fighter {
+    position: relative;
+    width: 300px;
+    height: 360px;
+    overflow: hidden;
+    border: 2px solid var(--purple-muted);
+    background: var(--bg-card);
+}
+
+.vs-intro-fighter.left {
+    animation: vsSlideFromLeft 0.8s var(--ease-out) both;
+    border-right: none;
+}
+
+.vs-intro-fighter.right {
+    animation: vsSlideFromRight 0.8s var(--ease-out) 0.5s both;
+    border-left: none;
+}
+
+.vs-intro-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+}
+
+.vs-intro-name {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-shadow:
+        0 0 20px rgba(var(--gold-rgb), 0.6),
+        0 2px 10px rgba(0, 0, 0, 0.9);
+    animation: labelAppear 0.4s var(--ease-spring) 0.9s both;
+}
+
+.vs-intro-name.opponent {
+    color: var(--purple-light);
+    text-shadow:
+        0 0 20px rgba(var(--purple-rgb), 0.6),
+        0 2px 10px rgba(0, 0, 0, 0.9);
+    animation-delay: 1.4s;
+}
+
+.vs-intro-text {
+    font-family: var(--font-display);
+    font-size: 6rem;
+    font-weight: 900;
+    color: var(--gold-light);
+    letter-spacing: 0.15em;
+    text-shadow:
+        0 0 40px rgba(var(--gold-rgb), 0.8),
+        0 0 80px rgba(var(--gold-rgb), 0.4),
+        0 0 120px rgba(var(--gold-rgb), 0.2);
+    transform: scale(0);
+    opacity: 0;
+    z-index: 103;
+}
+
+.vs-intro-text.visible {
+    animation: vsTextSlam 0.5s var(--ease-spring) both;
+}
+
+@keyframes vsSlideFromLeft {
+    from {
+        transform: translateX(-120vw) rotate(-2deg);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes vsSlideFromRight {
+    from {
+        transform: translateX(120vw) rotate(2deg);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes vsTextSlam {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.3);
+        opacity: 1;
+    }
+    80% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
 .error-text {
     color: var(--rose);
     font-size: 0.9rem;
@@ -1060,5 +1203,18 @@ body {
 
     .board.main {
         --cell-size: 24px;
+    }
+
+    .vs-intro-fighter {
+        width: 180px;
+        height: 220px;
+    }
+
+    .vs-intro-text {
+        font-size: 3.5rem;
+    }
+
+    .vs-intro-fighters {
+        gap: 1rem;
     }
 }

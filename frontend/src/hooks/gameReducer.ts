@@ -1,5 +1,5 @@
-import { BoardState, CellData, CellState, ClientCell, GamePhase, GameState } from "../types/game";
-import { clearToken } from "./useWebSocket";
+import {BoardState, CellData, CellState, ClientCell, GamePhase, GameState} from "../types/game";
+import {clearToken} from "./useWebSocket";
 
 export type Action =
     | { type: "game_created"; code: string }
@@ -24,6 +24,7 @@ export type Action =
     | { type: "opponent_reconnected" }
     | { type: "countdown_tick" }
     | { type: "first_click_pending"; x: number; y: number }
+    | { type: "vs_intro_done" }
     | { type: "error"; message: string }
     | { type: "reset" };
 
@@ -103,7 +104,7 @@ export function reducer(state: GameState, action: Action): GameState {
             const opIdx = myIdx === 0 ? 1 : 0;
             return {
                 ...state,
-                phase: GamePhase.Playing,
+                phase: GamePhase.VsIntro,
                 myCharacter: chars[myIdx] ?? "",
                 opponentCharacter: chars[opIdx] ?? "",
                 myBoard: createBoard(action.width, action.height, action.mines),
@@ -265,6 +266,12 @@ export function reducer(state: GameState, action: Action): GameState {
             return {
                 ...state,
                 disconnectCountdown: state.disconnectCountdown - 1,
+            };
+        }
+        case "vs_intro_done": {
+            return {
+                ...state,
+                phase: GamePhase.Playing,
             };
         }
         case "error": {

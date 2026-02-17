@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useReducer, useRef } from "react";
-import { GamePhase, IncomingMessage } from "../types/game";
-import { storeToken, useWebSocket } from "./useWebSocket";
-import { initialState, reducer } from "./gameReducer";
+import {useCallback, useEffect, useReducer, useRef} from "react";
+import {GamePhase, IncomingMessage} from "../types/game";
+import {storeToken, useWebSocket} from "./useWebSocket";
+import {initialState, reducer} from "./gameReducer";
 
 export function useGame() {
     const [state, dispatch] = useReducer(reducer, initialState);
     const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const explosionRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const explosionIndexRef = useRef(0);
+    const vsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const hasCountdown = state.opponentDisconnected && state.disconnectCountdown > 0;
 
@@ -55,6 +56,21 @@ export function useGame() {
             }
         };
     }, [state.phase, state.pendingMineCells]);
+
+    useEffect(() => {
+        if (state.phase === GamePhase.VsIntro) {
+            vsTimerRef.current = setTimeout(() => {
+                dispatch({ type: "vs_intro_done" });
+            }, 3500);
+        }
+
+        return () => {
+            if (vsTimerRef.current) {
+                clearTimeout(vsTimerRef.current);
+                vsTimerRef.current = null;
+            }
+        };
+    }, [state.phase]);
 
     const onMessage = useCallback((msg: IncomingMessage) => {
         switch (msg.type) {

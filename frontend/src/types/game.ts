@@ -74,6 +74,7 @@ export enum GamePhase {
     Lobby,
     Waiting,
     CharacterSelect,
+    VsIntro,
     Playing,
     Exploding,
     Finished,
