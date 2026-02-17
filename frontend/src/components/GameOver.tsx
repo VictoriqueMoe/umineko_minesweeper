@@ -1,5 +1,6 @@
 import {useEffect, useRef} from "react";
 import {CHARACTERS, resolveExpression} from "../characters";
+import {useGameAudio} from "../hooks/useGameAudio";
 
 interface GameOverProps {
     won: boolean;
@@ -139,6 +140,8 @@ function ConfettiCanvas() {
 }
 
 export function GameOver({ won, reason, myCharacter, opponentCharacter, onPlayAgain }: GameOverProps) {
+    useGameAudio(myCharacter, opponentCharacter, won);
+
     const myChar = CHARACTERS.find(c => c.id === myCharacter);
     const opChar = CHARACTERS.find(c => c.id === opponentCharacter);
 
