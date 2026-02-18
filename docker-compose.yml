@@ -4,4 +4,4 @@ services:
     container_name: umineko-minesweeper
     restart: unless-stopped
     ports:
-      - "4324:2000"
+      - "4321:2000"
