@@ -48,6 +48,7 @@ func (h *Hub) Run() {
 		case client := <-h.Register:
 			h.mu.Lock()
 			h.clients[client] = true
+			log.Printf("client connected (total=%d)", len(h.clients))
 			h.mu.Unlock()
 
 		case client := <-h.Unregister:
@@ -55,6 +56,7 @@ func (h *Hub) Run() {
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.Send)
+				log.Printf("client disconnected (total=%d, room=%s)", len(h.clients), client.RoomCode)
 				h.handleDisconnect(client)
 			}
 			h.mu.Unlock()
@@ -81,6 +83,15 @@ func (h *Hub) HandleMessage(client *Client, msg *IncomingMessage) {
 			Type:    MsgError,
 			Message: "unknown message type",
 		})
+	}
+}
+
+func (h *Hub) cancelTimer(key string) {
+	if dt, exists := h.disconnectTimers[key]; exists {
+		dt.timer.Stop()
+		close(dt.cancelChan)
+		delete(h.disconnectTimers, key)
+		log.Printf("cancelled disconnect timer %s", key)
 	}
 }
 
@@ -111,6 +122,8 @@ func (h *Hub) handleCreateGame(client *Client, difficulty game.Difficulty, chara
 
 	h.RoomManager.SetPlayerToken(code, 0, token)
 	h.RoomManager.SetCharacter(code, 0, character)
+
+	log.Printf("room %s created (difficulty=%s, character=%s)", code, difficulty, character)
 
 	client.SendMessage(OutgoingMessage{
 		Type:  MsgGameCreated,
@@ -153,6 +166,8 @@ func (h *Hub) handleJoinGame(client *Client, code string) {
 	client.PendingJoin = true
 	h.rooms[code] = append(h.rooms[code], client)
 	h.mu.Unlock()
+
+	log.Printf("player joining room %s (pending character select)", code)
 
 	client.SendMessage(OutgoingMessage{
 		Type:          MsgJoinPending,
@@ -215,6 +230,8 @@ func (h *Hub) handleSelectCharacter(client *Client, character string) {
 
 	room.Game.Start()
 
+	log.Printf("room %s game started (characters: %s vs %s)", code, room.Characters[0], room.Characters[1])
+
 	for _, c := range clients {
 		c.SendMessage(OutgoingMessage{
 			Type:       MsgGameStart,
@@ -253,12 +270,10 @@ func (h *Hub) handleReconnect(client *Client, token string) {
 	}
 
 	timerKey := code + ":" + string(rune('0'+playerNum))
+	bothKey := code + ":both"
 	h.mu.Lock()
-	if dt, exists := h.disconnectTimers[timerKey]; exists {
-		dt.timer.Stop()
-		close(dt.cancelChan)
-		delete(h.disconnectTimers, timerKey)
-	}
+	h.cancelTimer(timerKey)
+	h.cancelTimer(bothKey)
 
 	client.RoomCode = code
 	client.PlayerNumber = playerNum
@@ -348,6 +363,7 @@ func (h *Hub) handleReveal(client *Client, x, y int) {
 		}
 
 		if result.GameOver {
+			log.Printf("room %s game over (winner=%d, reason=%s)", code, result.Result.Winner, result.Result.Reason)
 			msg := OutgoingMessage{
 				Type:   MsgGameOver,
 				Winner: result.Result.Winner,
@@ -468,11 +484,7 @@ func (h *Hub) handleDisconnect(client *Client) {
 	if len(remaining) == 0 {
 		otherPlayer := 1 - client.PlayerNumber
 		existingKey := code + ":" + string(rune('0'+otherPlayer))
-		if dt, exists := h.disconnectTimers[existingKey]; exists {
-			dt.timer.Stop()
-			close(dt.cancelChan)
-			delete(h.disconnectTimers, existingKey)
-		}
+		h.cancelTimer(existingKey)
 
 		timerKey := code + ":both"
 		cancelChan := make(chan struct{})
