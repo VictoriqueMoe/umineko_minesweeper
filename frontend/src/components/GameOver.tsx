@@ -1,6 +1,6 @@
-import {useEffect, useRef} from "react";
-import {CHARACTERS, resolveExpression} from "../characters";
-import {useGameAudio} from "../hooks/useGameAudio";
+import { useEffect, useRef } from "react";
+import { CHARACTERS, resolveExpression } from "../characters";
+import { useGameAudio } from "../hooks/useGameAudio";
 
 interface GameOverProps {
     won: boolean;
@@ -46,16 +46,7 @@ interface ConfettiParticle {
     maxLife: number;
 }
 
-const CONFETTI_COLORS = [
-    "#ffd700",
-    "#ffb347",
-    "#ff6b6b",
-    "#c084fc",
-    "#67e8f9",
-    "#ffffff",
-    "#f0c040",
-    "#ff9ff3",
-];
+const CONFETTI_COLORS = ["#ffd700", "#ffb347", "#ff6b6b", "#c084fc", "#67e8f9", "#ffffff", "#f0c040", "#ff9ff3"];
 
 function ConfettiCanvas() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -75,7 +66,7 @@ function ConfettiCanvas() {
 
         const particles: ConfettiParticle[] = [];
         for (let i = 0; i < 150; i++) {
-            const angle = (Math.random() * Math.PI * 2);
+            const angle = Math.random() * Math.PI * 2;
             const speed = 2 + Math.random() * 6;
             particles.push({
                 x: canvas.width * 0.5 + (Math.random() - 0.5) * canvas.width * 0.3,

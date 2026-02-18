@@ -1,9 +1,9 @@
-import {useEffect} from "react";
-import {BoardState, CellState, GamePhase} from "../types/game";
-import {Board} from "./Board";
-import {MiniBoard} from "./MiniBoard";
-import {CharacterDef, CHARACTERS, Expression} from "../characters";
-import {useCharacterMood} from "../hooks/useCharacterMood";
+import { useEffect } from "react";
+import { BoardState, CellState, GamePhase } from "../types/game";
+import { Board } from "./Board";
+import { MiniBoard } from "./MiniBoard";
+import { CharacterDef, CHARACTERS, Expression } from "../characters";
+import { useCharacterMood } from "../hooks/useCharacterMood";
 
 interface GameProps {
     phase: GamePhase;

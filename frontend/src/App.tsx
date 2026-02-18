@@ -9,6 +9,7 @@ import { DisconnectOverlay } from "./components/DisconnectOverlay";
 import { ConnectionLostOverlay } from "./components/ConnectionLostOverlay";
 import { Particles } from "./components/Particles";
 import { VsIntro } from "./components/VsIntro";
+import { Footer } from "./components/Footer";
 
 const THEME_CLASSES = ["theme-bernkastel", "theme-erika", "theme-lambdadelta"];
 
@@ -101,20 +102,7 @@ export function App() {
 
             {!connected && state.phase !== GamePhase.Lobby && <ConnectionLostOverlay />}
 
-            <footer className="footer">
-                <div>
-                    Concept & Testing by{" "}
-                    <a href="https://x.com/dalekstrat1" target="_blank" rel="noopener noreferrer">
-                        @dalekstrat1
-                    </a>
-                </div>
-                <div>
-                    Built with ♥ by{" "}
-                    <a href="https://x.com/FeatherineFAA" target="_blank" rel="noopener noreferrer">
-                        @FeatherineFAA
-                    </a>
-                </div>
-            </footer>
+            <Footer />
         </>
     );
 }

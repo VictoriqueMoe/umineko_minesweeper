@@ -1210,6 +1210,38 @@ body {
     color: var(--gold);
 }
 
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+
+.footer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    border: 1px solid var(--purple-muted);
+    transition: all 0.3s var(--ease-out);
+}
+
+.footer-link:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+}
+
+.footer-link svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
 @media (max-width: 768px) {
     .game-layout {
         flex-direction: column;
