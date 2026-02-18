@@ -1,5 +1,5 @@
-import {useEffect, useRef} from "react";
-import {getGameOverAudio} from "../audio";
+import { useEffect, useRef } from "react";
+import { getGameOverAudio } from "../audio";
 
 export function useGameAudio(myCharacter: string, opponentCharacter: string, won: boolean) {
     const audioRef = useRef<HTMLAudioElement | null>(null);

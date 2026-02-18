@@ -1,4 +1,4 @@
-import {useEffect, useRef} from "react";
+import { useEffect, useRef } from "react";
 
 interface LightningBolt {
     segments: { x: number; y: number }[];

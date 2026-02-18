@@ -1,4 +1,4 @@
-import {Mood} from "./types/game";
+import { Mood } from "./types/game";
 
 export type Facing = "left" | "right" | "center";
 

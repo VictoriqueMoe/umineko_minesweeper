@@ -1,5 +1,5 @@
-import {BoardState, CellData, CellState, ClientCell, GamePhase, GameState} from "../types/game";
-import {clearToken} from "./useWebSocket";
+import { BoardState, CellData, CellState, ClientCell, GamePhase, GameState } from "../types/game";
+import { clearToken } from "./useWebSocket";
 
 export type Action =
     | { type: "game_created"; code: string }

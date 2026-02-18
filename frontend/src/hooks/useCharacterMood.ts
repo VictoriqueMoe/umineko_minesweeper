@@ -1,6 +1,6 @@
-import {useEffect, useMemo, useRef, useState} from "react";
-import {BoardState, CellState, GamePhase, Mood} from "../types/game";
-import {CharacterDef, Expression, resolveExpression} from "../characters";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { BoardState, CellState, GamePhase, Mood } from "../types/game";
+import { CharacterDef, Expression, resolveExpression } from "../characters";
 
 interface MoodInput {
     phase: GamePhase;

@@ -1,6 +1,6 @@
-import {useEffect, useState} from "react";
-import {CHARACTERS, resolveExpression} from "../characters";
-import {LightningCanvas} from "./LightningCanvas";
+import { useEffect, useState } from "react";
+import { CHARACTERS, resolveExpression } from "../characters";
+import { LightningCanvas } from "./LightningCanvas";
 
 interface VsIntroProps {
     myCharacter: string;
