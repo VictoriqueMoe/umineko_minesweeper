@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	writeWait      = 10 * time.Second
-	pongWait       = 30 * time.Second
-	pingPeriod     = (pongWait * 9) / 10
-	maxMessageSize = 512
+	writeWait         = 10 * time.Second
+	pongWait          = 30 * time.Second
+	pingPeriod        = (pongWait * 9) / 10
+	maxMessageSize    = 512
+	unregisterTimeout = 5 * time.Second
 )
 
 type Client struct {
@@ -36,15 +37,21 @@ func NewClient(hub *Hub, conn *websocket.Conn) *Client {
 
 func (c *Client) ReadPump() {
 	defer func() {
-		c.Hub.Unregister <- c
-		c.Conn.Close()
+		select {
+		case c.Hub.Unregister <- c:
+		case <-time.After(unregisterTimeout):
+			log.Printf("unregister channel blocked for %v, forcing connection close", unregisterTimeout)
+		}
+		_ = c.Conn.Close()
 	}()
 
 	c.Conn.SetReadLimit(maxMessageSize)
-	c.Conn.SetReadDeadline(time.Now().Add(pongWait))
+	if err := c.Conn.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
+		log.Printf("initial SetReadDeadline error: %v", err)
+		return
+	}
 	c.Conn.SetPongHandler(func(string) error {
-		c.Conn.SetReadDeadline(time.Now().Add(pongWait))
-		return nil
+		return c.Conn.SetReadDeadline(time.Now().Add(pongWait))
 	})
 
 	for {
@@ -73,15 +80,20 @@ func (c *Client) WritePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.Conn.Close()
+		_ = c.Conn.Close()
 	}()
 
 	for {
 		select {
 		case message, ok := <-c.Send:
-			c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.Conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
+				log.Printf("SetWriteDeadline error: %v", err)
+				return
+			}
 			if !ok {
-				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				if err := c.Conn.WriteMessage(websocket.CloseMessage, []byte{}); err != nil {
+					log.Printf("WriteCloseMessage error: %v", err)
+				}
 				return
 			}
 
@@ -89,14 +101,18 @@ func (c *Client) WritePump() {
 			if err != nil {
 				return
 			}
-			w.Write(message)
-
+			if _, err := w.Write(message); err != nil {
+				return
+			}
 			if err := w.Close(); err != nil {
 				return
 			}
 
 		case <-ticker.C:
-			c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.Conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
+				log.Printf("SetWriteDeadline error: %v", err)
+				return
+			}
 			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
