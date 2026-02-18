@@ -466,17 +466,30 @@ func (h *Hub) handleDisconnect(client *Client) {
 	}
 
 	if len(remaining) == 0 {
+		otherPlayer := 1 - client.PlayerNumber
+		existingKey := code + ":" + string(rune('0'+otherPlayer))
+		if dt, exists := h.disconnectTimers[existingKey]; exists {
+			dt.timer.Stop()
+			close(dt.cancelChan)
+			delete(h.disconnectTimers, existingKey)
+		}
+
 		timerKey := code + ":both"
 		cancelChan := make(chan struct{})
 		timer := time.AfterFunc(disconnectTimeout, func() {
 			h.mu.Lock()
 			defer h.mu.Unlock()
-			if _, cancelled := <-cancelChan; !cancelled {
-				delete(h.disconnectTimers, timerKey)
-				delete(h.rooms, code)
-				h.RoomManager.RemoveRoom(code)
-				log.Printf("room %s removed (both players disconnected)", code)
+
+			select {
+			case <-cancelChan:
+				return
+			default:
 			}
+
+			delete(h.disconnectTimers, timerKey)
+			delete(h.rooms, code)
+			h.RoomManager.RemoveRoom(code)
+			log.Printf("room %s removed (both players disconnected)", code)
 		})
 		h.disconnectTimers[timerKey] = &disconnectTimer{
 			timer:      timer,
