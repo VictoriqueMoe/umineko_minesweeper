@@ -46,21 +46,33 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.Register:
-			h.mu.Lock()
-			h.clients[client] = true
-			log.Printf("client connected (total=%d)", len(h.clients))
-			h.mu.Unlock()
-
+			h.registerClient(client)
 		case client := <-h.Unregister:
-			h.mu.Lock()
-			if _, ok := h.clients[client]; ok {
-				delete(h.clients, client)
-				close(client.Send)
-				log.Printf("client disconnected (total=%d, room=%s)", len(h.clients), client.RoomCode)
-				h.handleDisconnect(client)
-			}
-			h.mu.Unlock()
+			h.unregisterClient(client)
 		}
+	}
+}
+
+func (h *Hub) registerClient(client *Client) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.clients[client] = true
+	log.Printf("client connected (total=%d)", len(h.clients))
+}
+
+func (h *Hub) unregisterClient(client *Client) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("panic in unregisterClient: %v", r)
+		}
+	}()
+	if _, ok := h.clients[client]; ok {
+		delete(h.clients, client)
+		close(client.Send)
+		log.Printf("client disconnected (total=%d, room=%s)", len(h.clients), client.RoomCode)
+		h.handleDisconnect(client)
 	}
 }
 
@@ -113,12 +125,14 @@ func (h *Hub) handleCreateGame(client *Client, difficulty game.Difficulty, chara
 	_, code := h.RoomManager.CreateRoom(difficulty)
 	token := generateToken()
 
-	h.mu.Lock()
-	client.RoomCode = code
-	client.PlayerNumber = 0
-	client.Token = token
-	h.rooms[code] = []*Client{client}
-	h.mu.Unlock()
+	func() {
+		h.mu.Lock()
+		defer h.mu.Unlock()
+		client.RoomCode = code
+		client.PlayerNumber = 0
+		client.Token = token
+		h.rooms[code] = []*Client{client}
+	}()
 
 	h.RoomManager.SetPlayerToken(code, 0, token)
 	h.RoomManager.SetCharacter(code, 0, character)
@@ -161,11 +175,13 @@ func (h *Hub) handleJoinGame(client *Client, code string) {
 
 	hostChar := h.RoomManager.GetHostCharacter(code)
 
-	h.mu.Lock()
-	client.RoomCode = code
-	client.PendingJoin = true
-	h.rooms[code] = append(h.rooms[code], client)
-	h.mu.Unlock()
+	func() {
+		h.mu.Lock()
+		defer h.mu.Unlock()
+		client.RoomCode = code
+		client.PendingJoin = true
+		h.rooms[code] = append(h.rooms[code], client)
+	}()
 
 	log.Printf("player joining room %s (pending character select)", code)
 
@@ -206,13 +222,16 @@ func (h *Hub) handleSelectCharacter(client *Client, character string) {
 
 	token := generateToken()
 
-	h.mu.Lock()
-	client.PlayerNumber = 1
-	client.Token = token
-	client.PendingJoin = false
-	clients := make([]*Client, len(h.rooms[code]))
-	copy(clients, h.rooms[code])
-	h.mu.Unlock()
+	clients := func() []*Client {
+		h.mu.Lock()
+		defer h.mu.Unlock()
+		client.PlayerNumber = 1
+		client.Token = token
+		client.PendingJoin = false
+		c := make([]*Client, len(h.rooms[code]))
+		copy(c, h.rooms[code])
+		return c
+	}()
 
 	h.RoomManager.SetPlayerToken(code, 1, token)
 	h.RoomManager.SetCharacter(code, 1, character)
@@ -271,17 +290,19 @@ func (h *Hub) handleReconnect(client *Client, token string) {
 
 	timerKey := code + ":" + string(rune('0'+playerNum))
 	bothKey := code + ":both"
-	h.mu.Lock()
-	h.cancelTimer(timerKey)
-	h.cancelTimer(bothKey)
-
-	client.RoomCode = code
-	client.PlayerNumber = playerNum
-	client.Token = token
-	h.rooms[code] = append(h.rooms[code], client)
-	clients := make([]*Client, len(h.rooms[code]))
-	copy(clients, h.rooms[code])
-	h.mu.Unlock()
+	clients := func() []*Client {
+		h.mu.Lock()
+		defer h.mu.Unlock()
+		h.cancelTimer(timerKey)
+		h.cancelTimer(bothKey)
+		client.RoomCode = code
+		client.PlayerNumber = playerNum
+		client.Token = token
+		h.rooms[code] = append(h.rooms[code], client)
+		c := make([]*Client, len(h.rooms[code]))
+		copy(c, h.rooms[code])
+		return c
+	}()
 
 	client.SendMessage(OutgoingMessage{
 		Type:         MsgReconnected,
@@ -349,9 +370,11 @@ func (h *Hub) handleReveal(client *Client, x, y int) {
 		return
 	}
 
-	h.mu.RLock()
-	clients := h.rooms[code]
-	h.mu.RUnlock()
+	clients := func() []*Client {
+		h.mu.RLock()
+		defer h.mu.RUnlock()
+		return h.rooms[code]
+	}()
 
 	for _, result := range results {
 		for _, c := range clients {
@@ -378,10 +401,12 @@ func (h *Hub) handleReveal(client *Client, x, y int) {
 				c.RoomCode = ""
 				c.Token = ""
 			}
-			h.mu.Lock()
-			delete(h.rooms, code)
-			h.RoomManager.RemoveRoom(code)
-			h.mu.Unlock()
+			func() {
+				h.mu.Lock()
+				defer h.mu.Unlock()
+				delete(h.rooms, code)
+				h.RoomManager.RemoveRoom(code)
+			}()
 			return
 		}
 	}
@@ -402,9 +427,11 @@ func (h *Hub) handleFlag(client *Client, x, y int) {
 		return
 	}
 
-	h.mu.RLock()
-	clients := h.rooms[client.RoomCode]
-	h.mu.RUnlock()
+	clients := func() []*Client {
+		h.mu.RLock()
+		defer h.mu.RUnlock()
+		return h.rooms[client.RoomCode]
+	}()
 
 	for _, c := range clients {
 		c.SendMessage(OutgoingMessage{
