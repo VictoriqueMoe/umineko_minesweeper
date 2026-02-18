@@ -37,12 +37,18 @@ func NewClient(hub *Hub, conn *websocket.Conn) *Client {
 
 func (c *Client) ReadPump() {
 	defer func() {
+		timer := time.NewTimer(unregisterTimeout)
+		defer timer.Stop()
+
 		select {
 		case c.Hub.Unregister <- c:
-		case <-time.After(unregisterTimeout):
+		case <-timer.C:
 			log.Printf("unregister channel blocked for %v, forcing connection close", unregisterTimeout)
 		}
-		_ = c.Conn.Close()
+
+		if err := c.Conn.Close(); err != nil {
+			log.Printf("websocket close error (readpump): %v", err)
+		}
 	}()
 
 	c.Conn.SetReadLimit(maxMessageSize)
@@ -51,7 +57,11 @@ func (c *Client) ReadPump() {
 		return
 	}
 	c.Conn.SetPongHandler(func(string) error {
-		return c.Conn.SetReadDeadline(time.Now().Add(pongWait))
+		if err := c.Conn.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
+			log.Printf("SetReadDeadline error (pong): %v", err)
+			return err
+		}
+		return nil
 	})
 
 	for {
@@ -80,7 +90,9 @@ func (c *Client) WritePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		_ = c.Conn.Close()
+		if err := c.Conn.Close(); err != nil {
+			log.Printf("websocket close error (writepump): %v", err)
+		}
 	}()
 
 	for {
@@ -99,12 +111,16 @@ func (c *Client) WritePump() {
 
 			w, err := c.Conn.NextWriter(websocket.TextMessage)
 			if err != nil {
+				log.Printf("NextWriter error: %v", err)
 				return
 			}
 			if _, err := w.Write(message); err != nil {
+				log.Printf("writer write error: %v", err)
+				_ = w.Close()
 				return
 			}
 			if err := w.Close(); err != nil {
+				log.Printf("writer close error: %v", err)
 				return
 			}
 
@@ -114,6 +130,7 @@ func (c *Client) WritePump() {
 				return
 			}
 			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				log.Printf("write ping error: %v", err)
 				return
 			}
 		}
