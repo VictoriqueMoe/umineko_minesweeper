@@ -14,8 +14,8 @@ interface AudioConfig {
 const CHARACTER_AUDIO: Record<string, AudioConfig> = {
     bernkastel: {
         default: {
-            lose: "https://quotes.auaurora.moe/?quote=82100692"
-            // win: "",
+            lose: "https://quotes.auaurora.moe/?quote=82100692",
+            win: "https://quotes.auaurora.moe/api/v1/audio/combined?segments=28:72100547,28:72100548,28:72100549",
         },
         matchups: {
             lambdadelta: {
@@ -26,14 +26,14 @@ const CHARACTER_AUDIO: Record<string, AudioConfig> = {
     erika: {
         default: {
             win: "https://quotes.auaurora.moe/?builder=46:64501228,46:64501229,46:64501230",
-            // lose: "",
+            lose: "https://quotes.auaurora.moe/?builder=46:54500569,46:54500571,46:54500572",
         },
         matchups: {},
     },
     lambdadelta: {
         default: {
-            win: "",
-            // lose: "",
+            win: "https://quotes.auaurora.moe/api/v1/audio/combined?segments=29:92200077,29:92200078,29:92200079",
+            lose: "https://quotes.auaurora.moe/api/v1/audio/combined?segments=29:82200264,29:82200265",
         },
         matchups: {},
     },

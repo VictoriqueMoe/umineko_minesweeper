@@ -1,14 +1,14 @@
-import {useCallback, useEffect, useState} from "react";
-import {GamePhase} from "./types/game";
-import {useGame} from "./hooks/useGame";
-import {Lobby} from "./components/Lobby";
-import {CharacterSelect} from "./components/CharacterSelect";
-import {Game} from "./components/Game";
-import {GameOver} from "./components/GameOver";
-import {DisconnectOverlay} from "./components/DisconnectOverlay";
-import {ConnectionLostOverlay} from "./components/ConnectionLostOverlay";
-import {Particles} from "./components/Particles";
-import {VsIntro} from "./components/VsIntro";
+import { useCallback, useEffect, useState } from "react";
+import { GamePhase } from "./types/game";
+import { useGame } from "./hooks/useGame";
+import { Lobby } from "./components/Lobby";
+import { CharacterSelect } from "./components/CharacterSelect";
+import { Game } from "./components/Game";
+import { GameOver } from "./components/GameOver";
+import { DisconnectOverlay } from "./components/DisconnectOverlay";
+import { ConnectionLostOverlay } from "./components/ConnectionLostOverlay";
+import { Particles } from "./components/Particles";
+import { VsIntro } from "./components/VsIntro";
 
 const THEME_CLASSES = ["theme-bernkastel", "theme-erika", "theme-lambdadelta"];
 
@@ -67,10 +67,7 @@ export function App() {
             )}
 
             {state.phase === GamePhase.VsIntro && (
-                <VsIntro
-                    myCharacter={state.myCharacter}
-                    opponentCharacter={state.opponentCharacter}
-                />
+                <VsIntro myCharacter={state.myCharacter} opponentCharacter={state.opponentCharacter} />
             )}
 
             {showBoard && state.myBoard && state.opponentBoard && (
@@ -103,6 +100,21 @@ export function App() {
             )}
 
             {!connected && state.phase !== GamePhase.Lobby && <ConnectionLostOverlay />}
+
+            <footer className="footer">
+                <div>
+                    Concept & Testing by{" "}
+                    <a href="https://x.com/dalekstrat1" target="_blank" rel="noopener noreferrer">
+                        @dalekstrat1
+                    </a>
+                </div>
+                <div>
+                    Built with ♥ by{" "}
+                    <a href="https://x.com/FeatherineFAA" target="_blank" rel="noopener noreferrer">
+                        @FeatherineFAA
+                    </a>
+                </div>
+            </footer>
         </>
     );
 }

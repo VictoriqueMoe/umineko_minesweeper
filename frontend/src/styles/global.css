@@ -1191,6 +1191,25 @@ body {
     }
 }
 
+.footer {
+    margin-top: auto;
+    padding: 1.5rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+.footer a {
+    color: var(--gold-dark);
+    text-decoration: none;
+    transition: color 0.2s var(--ease-out);
+}
+
+.footer a:hover {
+    color: var(--gold);
+}
+
 @media (max-width: 768px) {
     .game-layout {
         flex-direction: column;
